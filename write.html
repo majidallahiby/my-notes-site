@@ -97,18 +97,42 @@ ul#currentNotes li:hover {
   border-radius: 5px;
   padding: 2px 5px;
 }
+.header button {
+
+  padding: 8px 15px;
+  font-size: 18px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 </style>
 
 </head>
 <body>
 <div class="container">
-  <h1>✏️ اكتب ملاحظاتك:</h1>
-
+ <div class="header">
+  <h2>✏️ اكتب ملاحظاتك:</h2>
+<button onclick="showAlertMessage()" style="width:5px">!</button>
+</div>
   <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
+
   <br />
   <button onclick="sendNote()">إرسال</button>
 
   <div id="status"></div>
+
+
+
 
   <h2>الملاحظات الحالية</h2>
   <div id="currentNotes" class="box">جاري التحميل...</div>
@@ -228,6 +252,10 @@ ul#currentNotes li:hover {
 
     }
 
+ function showAlertMessage() {
+            // استخدام دالة alert() لعرض نافذة منبثقة
+            alert("Majid Allahiby IT\nmajid.allahiby@gmail.com\n9647807886708\n9647705278677");
+        }
     // تحميل الملاحظات عند فتح الصفحة
     loadNotes();
   </script>

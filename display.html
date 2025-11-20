@@ -78,6 +78,8 @@ ul#currentNotes {
     <div class="controls">
       <button onclick="changeFontSize(2)">A+</button>
       <button onclick="changeFontSize(-2)">A-</button>
+      <button onclick="refreshPage()">تحديث</button>
+ <button onclick="showAlertMessage()">!</button>
     </div>
   </div>
   <ul id="currentNotes"></ul>
@@ -184,8 +186,14 @@ ul#currentNotes {
     }
 
 
-
-
+function refreshPage() {
+            // استخدام location.reload() لإعادة تحميل الصفحة الحالية
+            location.reload(); 
+        }
+ function showAlertMessage() {
+            // استخدام دالة alert() لعرض نافذة منبثقة
+            alert("Majid Allahiby IT\nmajid.allahiby@gmail.com\n9647807886708\n9647705278677");
+        }
 
     // تحميل الملاحظات عند فتح الصفحة
     loadNotes();
