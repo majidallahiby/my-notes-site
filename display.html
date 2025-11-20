@@ -2,125 +2,139 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الملاحظات اليومية</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-
+<title>📺 الملاحظات اليومية</title>
 <style>
 body {
-  font-family: sans-serif;
-  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  transition: background-color 1s;
-  direction: rtl;
-  text-align: right;
-}
-h2 {
-  margin-bottom: 15px;
-}
-#controls {
+  padding: 0;
   display: flex;
-  justify-content: flex-start;
-  gap: 10px;
-  margin-bottom: 15px;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  transition: background 1s linear;
+  color: #333;
 }
-button {
+
+.container {
+  width: 90%;
+  max-width: 900px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 20px;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 40px;
+  margin: 0;
+}
+
+.controls button {
   padding: 8px 15px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 8px;
+  font-size: 18px;
+  margin-left: 10px;
   border: none;
-  background: #007bff;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #4CAF50;
   color: white;
 }
-button:hover { background: #0056b3; }
-#notesList {
-  list-style: none;
-  padding-right: 0;
+
+.controls button:hover {
+  background-color: #45a049;
 }
-#notesList li {
-  background: rgba(255,255,255,0.8);
-  margin-bottom: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  font-size: 18px;
+
+ul#view {
+  list-style-type: disc;
+  padding-right: 20px;
+  font-size: 32px;
+  line-height: 1.6;
 }
 </style>
 </head>
 <body>
 
-<h2>الملاحظات اليومية</h2>
-
-<div id="controls">
-  <button onclick="changeFontSize(2)">تكبير الخط</button>
-  <button onclick="changeFontSize(-2)">تصغير الخط</button>
+<div class="container">
+  <div class="header">
+    <h1>📌 الملاحظات اليومية</h1>
+    <div class="controls">
+      <button onclick="changeFontSize(2)">A+</button>
+      <button onclick="changeFontSize(-2)">A-</button>
+    </div>
+  </div>
+  <ul id="view"></ul>
 </div>
 
-<ul id="notesList">
-  <li>جارٍ تحميل الملاحظات...</li>
-</ul>
-
+<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
 <script>
-const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVC0U";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const view = document.getElementById("view");
 
-const notesList = document.getElementById("notesList");
-let currentFontSize = 18;
+  // ---------- التحكم بحجم الخط ----------
+  function changeFontSize(delta) {
+    const current = parseInt(window.getComputedStyle(view).fontSize);
+    view.style.fontSize = (current + delta) + "px";
+  }
 
-// تغيير حجم الخط
-function changeFontSize(delta) {
-  currentFontSize += delta;
-  document.querySelectorAll("#notesList li").forEach(li => li.style.fontSize = currentFontSize + "px");
-}
-
-// تغيير لون الخلفية اليومي لمدة 30 يوم
-function setDailyBackground() {
-  const colors = [
-    "#fef9f0","#f0f9f9","#f9f0f0","#f0f0f9","#f9f9f0",
-    "#f0fff0","#fff0f0","#f0ffff","#fffaf0","#f9f9f9",
-    "#f0f9e9","#f9e9f0","#f0e9f9","#f9f0e9","#f0f9f5",
-    "#f5f0f9","#f9f5f0","#f0f5f9","#f9f9f5","#f5f9f0",
-    "#f0f9f2","#f2f0f9","#f9f2f0","#f0f2f9","#f9f0f2",
-    "#f0f9f1","#f1f0f9","#f9f1f0","#f0f9f3","#f3f0f9"
+  // ---------- ألوان التدرج اليومية ----------
+  const gradientColors = [
+    ["#fbeee6","#fceeea"], ["#f4f4f4","#eaf4f8"], ["#f4f0f4","#f0f8f0"],
+    ["#f0f8ea","#f9f9f9"], ["#f5eef8","#f0f0f5"], ["#fafaf0","#f0faf4"],
+    ["#f7f0e6","#f0f7f4"], ["#f0f0f8","#f4f0f0"], ["#f0f4ff","#f4f8f0"],
+    ["#f9f0f0","#f0f0f5"], ["#f0faf4","#f0f4f0"], ["#f7f7f7","#f8f0f0"],
+    ["#f0f8f7","#f4f4f4"], ["#fbeee6","#f0f8f0"], ["#f4f4f4","#f0f4ff"],
+    ["#f0f0f0","#fafaf0"], ["#f5f5dc","#f0fff0"], ["#f0f4f0","#f4f0f4"],
+    ["#f9f9f0","#f0f5fa"], ["#f7f0e6","#f0f7f4"], ["#f0f0f8","#f4f0f0"],
+    ["#f0f4ff","#f4f8f0"], ["#f9f0f0","#f0f0f5"], ["#f0faf4","#f0f4f0"],
+    ["#f7f7f7","#f8f0f0"], ["#f0f8f7","#f4f4f4"], ["#fbeee6","#f0f8f0"],
+    ["#f4f4f4","#f0f4ff"], ["#f0f0f0","#fafaf0"], ["#f5f5dc","#f0fff0"]
   ];
-  const day = new Date().getDate(); // رقم اليوم 1-31
-  const index = (day-1) % colors.length;
-  document.body.style.backgroundColor = colors[index];
-}
+  const today = new Date();
+  const dayIndex = (today.getDate() - 1) % 30;
+  const [color1, color2] = gradientColors[dayIndex];
+  document.body.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
 
-// تحميل الملاحظات من Supabase وعرضها
-async function loadNotes() {
-  const { data, error } = await supabase
-    .from("notes")
-    .select("text")
-    .order("id", { ascending: true });
-
-  if(error){
-    notesList.innerHTML = "<li>خطأ في تحميل الملاحظات</li>";
-    console.error(error);
-    return;
+  // ---------- تحميل الملاحظات من localStorage ----------
+  function loadNotes() {
+    const saved = localStorage.getItem("dailyNotes");
+    if(saved) {
+      const lines = saved.split('\n');
+      view.innerHTML = '';
+      lines.forEach(line => {
+        if(line.trim() !== '') {
+          const li = document.createElement('li');
+          li.textContent = line;
+          view.appendChild(li);
+        }
+      });
+    }
   }
+  loadNotes();
 
-  if(data.length === 0){
-    notesList.innerHTML = "<li>لا توجد ملاحظات حاليا</li>";
-    return;
-  }
+  // ---------- إعداد Ably ----------
+  const ably = new Ably.Realtime("d7XY8g.iffthg:fC1_V_gyW5XuWkef5gjz8WAQ68AwXA3k3e-SXIVTC0U");
+  const channel = ably.channels.get("notes");
 
-  notesList.innerHTML = "";
-  data.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = item.text;
-    li.style.fontSize = currentFontSize + "px";
-    notesList.appendChild(li);
+  channel.subscribe("new-note", msg => {
+    const lines = msg.data.text.split('\n');
+    view.innerHTML = '';
+    lines.forEach(line => {
+      if(line.trim() !== '') {
+        const li = document.createElement('li');
+        li.textContent = line;
+        view.appendChild(li);
+      }
+    });
+    // حفظ الملاحظات في localStorage
+    localStorage.setItem("dailyNotes", msg.data.text);
   });
-}
-
-// تنفيذ عند فتح الصفحة
-setDailyBackground();
-loadNotes();
 </script>
 
 </body>

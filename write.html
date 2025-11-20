@@ -1,130 +1,164 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>📓 كتابة الملاحظات</title>
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0f4f8;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  margin: 0;
+  padding-top: 50px;
+  direction: rtl;
+}
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+.container {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  width: 90%;
+  max-width: 600px;
+}
 
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f7f7f7;
-      direction: rtl;
-      text-align: right;
-    }
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
 
-    textarea {
-      width: 100%;
-      height: 150px;
-      padding: 10px;
-      font-size: 18px;
-    }
+textarea {
+  width: 100%;
+  height: 200px;
+  font-size: 18px;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  resize: none;
+  direction: rtl;
+  text-align: right;
+}
 
-    button {
-      background: green;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      font-size: 20px;
-      cursor: pointer;
-      border-radius: 10px;
-      margin-top: 15px;
-    }
+button {
+  width: 100%;
+  padding: 15px;
+  margin-top: 15px;
+  font-size: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #28a745; /* أخضر واضح */
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
 
-    #status {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #009900;
-      font-weight: bold;
-    }
+button:hover {
+  background-color: #218838;
+}
 
-    .box {
-      background: white;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-    }
-  </style>
+#message {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 18px;
+  color: #155724; /* أخضر نجاح */
+  display: none;
+}
+
+#currentNotesContainer {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 2px solid #ccc;
+}
+
+#currentNotesContainer h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+ul#currentNotes {
+  list-style-type: disc;
+  padding-right: 20px;
+  font-size: 18px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+ul#currentNotes li:hover {
+  background-color: #e0ffe0;
+  border-radius: 5px;
+  padding: 2px 5px;
+}
+</style>
 </head>
 <body>
 
-  <h2>إرسال الملاحظات</h2>
+<div class="container">
+  <h1>✏️ اكتب ملاحظتك</h1>
+  <textarea id="note" placeholder="اكتب هنا..."></textarea>
+  <button onclick="send()">إرسال الملاحظة</button>
+  <div id="message">✅ تم إرسال الملاحظة بنجاح!</div>
 
-  <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
-  <br />
-  <button onclick="sendNote()">إرسال</button>
+  <div id="currentNotesContainer">
+    <h2>الملاحظات الحالية (اضغط لتعديل)</h2>
+    <ul id="currentNotes"></ul>
+  </div>
+</div>
 
-  <div id="status"></div>
+<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+<script>
+  const ably = new Ably.Realtime("d7XY8g.iffthg:fC1_V_gyW5XuWkef5gjz8WAQ68AwXA3k3e-SXIVTC0U");
+  const channel = ably.channels.get("notes");
+  const messageEl = document.getElementById("message");
+  const currentNotesUl = document.getElementById("currentNotes");
+  const noteTextarea = document.getElementById("note");
 
-  <h3>الملاحظات الحالية</h3>
-  <div id="currentNotes" class="box">جاري التحميل...</div>
-
-  <script>
-    // ----------------------------------
-    // ⛔ ضع قيم مشروعك هنا فقط
-    // ----------------------------------
-    const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co";  
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08";
-
-    // إنشاء اتصال Supabase
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // ----------------------
-    // إرسال الملاحظة
-    // ----------------------
-    async function sendNote() {
-  const text = document.getElementById("noteInput").value.trim();
-  if (!text) return;
-
-  const { error } = await supabase
-    .from("notes")
-    .update({ text: text })     // تحديث قيمة الحقل text
-    .eq("id", 2);               // تحديث السطر الذي id=2
-
-  if (!error) {
-    document.getElementById("status").innerHTML = "✔ تم تحديث الملاحظة بنجاح";
-    document.getElementById("noteInput").value = "";
-    loadNotes();
-  } else {
-    document.getElementById("status").innerHTML = "❌ خطأ بالتحديث";
+  function renderNotes(text) {
+    const lines = text.split('\n');
+    currentNotesUl.innerHTML = '';
+    lines.forEach(line => {
+      if(line.trim() !== '') {
+        const li = document.createElement('li');
+        li.textContent = line;
+        // ميزة النسخ السريع: عند الضغط، توضع في مربع الكتابة
+        li.addEventListener('click', () => {
+          noteTextarea.value = line;
+          noteTextarea.focus();
+        });
+        currentNotesUl.appendChild(li);
+      }
+    });
   }
-}
 
+  // ---------- تحميل الملاحظات من localStorage عند فتح الصفحة ----------
+  const savedNotes = localStorage.getItem("dailyNotes");
+  if(savedNotes) {
+    renderNotes(savedNotes);
+  }
 
-    // ----------------------
-    // تحميل الملاحظات الحالية
-    // ----------------------
-    async function loadNotes() {
-      const { data, error } = await supabase
-        .from("notes")
-        .select("*")
-        .order("id", { ascending: false });
+  // ---------- عند استلام ملاحظة جديدة من Ably ----------
+  channel.subscribe("new-note", msg => {
+    const text = msg.data.text;
+    renderNotes(text);
+    localStorage.setItem("dailyNotes", text);
+  });
 
-      if (error) {
-        document.getElementById("currentNotes").innerHTML = "خطأ بالتحميل";
-        return;
-      }
+  // ---------- إرسال الملاحظة ----------
+  function send() {
+    const text = noteTextarea.value;
+    if(text.trim() === "") return;
 
-      if (data.length === 0) {
-        document.getElementById("currentNotes").innerHTML = "لا توجد ملاحظات حاليا";
-        return;
-      }
+    channel.publish("new-note", { text });
 
-      let html = "";
-      data.forEach(n => {
-        html += `<div style="padding:8px 0;border-bottom:1px solid #ddd;">${n.text}</div>`;
-      });
+    messageEl.style.display = "block";
+    setTimeout(() => { messageEl.style.display = "none"; }, 2000);
 
-      document.getElementById("currentNotes").innerHTML = html;
-    }
-
-    // تحميل الملاحظات عند فتح الصفحة
-    loadNotes();
-  </script>
+    noteTextarea.value = "";
+  }
+</script>
 
 </body>
 </html>
