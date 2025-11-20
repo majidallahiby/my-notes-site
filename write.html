@@ -113,7 +113,49 @@ ul#currentNotes li:hover {
   <h2>الملاحظات الحالية</h2>
   <div id="currentNotes" class="box">جاري التحميل...</div>
 </div>
+
+
+
+
+<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+
+
+
+
   <script>
+
+  const ably = new Ably.Realtime("d7XY8g.iffthg:fC1_V_gyW5XuWkef5gjz8WAQ68AwXA3k3e-SXIVTC0U");
+  const channel = ably.channels.get("notes");
+  const messageEl = document.getElementById("message");
+  const currentNotesUl = document.getElementById("currentNotes");
+  const noteTextarea = document.getElementById("noteInput");
+
+  function renderNotes(text) {
+    const lines = text.split('\n');
+    currentNotesUl.innerHTML = '';
+    lines.forEach(line => {
+      if(line.trim() !== '') {
+        const li = document.createElement('li');
+        li.textContent = line;
+        // ميزة النسخ السريع: عند الضغط، توضع في مربع الكتابة
+        li.addEventListener('click', () => {
+          noteTextarea.value = line;
+          noteTextarea.focus();
+        });
+        currentNotesUl.appendChild(li);
+      }
+    });
+  }
+
+ 
+  // ---------- عند استلام ملاحظة جديدة من Ably ----------
+  channel.subscribe("new-note", msg => {
+    const text = msg.data.text;
+    renderNotes(text);
+
+  });
+
+
     // ----------------------------------
     // ⛔ ضع قيم مشروعك هنا فقط
     // ----------------------------------
@@ -127,7 +169,10 @@ ul#currentNotes li:hover {
     // إرسال الملاحظة
     // ----------------------
    async function sendNote() {
+
   const text = document.getElementById("noteInput").value.trim();
+    if(text.trim() === "") return;
+    channel.publish("new-note", { text });
   if (!text) return;
 
   const { error } = await supabase

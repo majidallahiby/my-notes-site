@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -83,9 +84,26 @@ ul#currentNotes {
 </div>
 
 
+<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+<script>
+  const view = document.getElementById("currentNotes");
 
+  // ---------- إعداد Ably ----------
+  const ably = new Ably.Realtime("d7XY8g.iffthg:fC1_V_gyW5XuWkef5gjz8WAQ68AwXA3k3e-SXIVTC0U");
+  const channel = ably.channels.get("notes");
 
-  <script>
+  channel.subscribe("new-note", msg => {
+    const lines = msg.data.text.split('\n');
+    view.innerHTML = '';
+    lines.forEach(line => {
+      if(line.trim() !== '') {
+        const li = document.createElement('li');
+        li.textContent = line;
+        view.appendChild(li);
+      }
+    });
+
+  });
 
 
 // ---------- التحكم بحجم الخط ----------
@@ -163,9 +181,11 @@ ul#currentNotes {
     }
 
       });
-
-
     }
+
+
+
+
 
     // تحميل الملاحظات عند فتح الصفحة
     loadNotes();
