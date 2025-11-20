@@ -1,1 +1,127 @@
-<!-- display page placeholder -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الملاحظات اليومية</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+
+<style>
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  margin: 0;
+  transition: background-color 1s;
+  direction: rtl;
+  text-align: right;
+}
+h2 {
+  margin-bottom: 15px;
+}
+#controls {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+button {
+  padding: 8px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  background: #007bff;
+  color: white;
+}
+button:hover { background: #0056b3; }
+#notesList {
+  list-style: none;
+  padding-right: 0;
+}
+#notesList li {
+  background: rgba(255,255,255,0.8);
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  font-size: 18px;
+}
+</style>
+</head>
+<body>
+
+<h2>الملاحظات اليومية</h2>
+
+<div id="controls">
+  <button onclick="changeFontSize(2)">تكبير الخط</button>
+  <button onclick="changeFontSize(-2)">تصغير الخط</button>
+</div>
+
+<ul id="notesList">
+  <li>جارٍ تحميل الملاحظات...</li>
+</ul>
+
+<script>
+const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVC0U";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const notesList = document.getElementById("notesList");
+let currentFontSize = 18;
+
+// تغيير حجم الخط
+function changeFontSize(delta) {
+  currentFontSize += delta;
+  document.querySelectorAll("#notesList li").forEach(li => li.style.fontSize = currentFontSize + "px");
+}
+
+// تغيير لون الخلفية اليومي لمدة 30 يوم
+function setDailyBackground() {
+  const colors = [
+    "#fef9f0","#f0f9f9","#f9f0f0","#f0f0f9","#f9f9f0",
+    "#f0fff0","#fff0f0","#f0ffff","#fffaf0","#f9f9f9",
+    "#f0f9e9","#f9e9f0","#f0e9f9","#f9f0e9","#f0f9f5",
+    "#f5f0f9","#f9f5f0","#f0f5f9","#f9f9f5","#f5f9f0",
+    "#f0f9f2","#f2f0f9","#f9f2f0","#f0f2f9","#f9f0f2",
+    "#f0f9f1","#f1f0f9","#f9f1f0","#f0f9f3","#f3f0f9"
+  ];
+  const day = new Date().getDate(); // رقم اليوم 1-31
+  const index = (day-1) % colors.length;
+  document.body.style.backgroundColor = colors[index];
+}
+
+// تحميل الملاحظات من Supabase وعرضها
+async function loadNotes() {
+  const { data, error } = await supabase
+    .from("notes")
+    .select("text")
+    .order("id", { ascending: true });
+
+  if(error){
+    notesList.innerHTML = "<li>خطأ في تحميل الملاحظات</li>";
+    console.error(error);
+    return;
+  }
+
+  if(data.length === 0){
+    notesList.innerHTML = "<li>لا توجد ملاحظات حاليا</li>";
+    return;
+  }
+
+  notesList.innerHTML = "";
+  data.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item.text;
+    li.style.fontSize = currentFontSize + "px";
+    notesList.appendChild(li);
+  });
+}
+
+// تنفيذ عند فتح الصفحة
+setDailyBackground();
+loadNotes();
+</script>
+
+</body>
+</html>

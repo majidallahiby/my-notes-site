@@ -1,1 +1,130 @@
-<!-- write page placeholder -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f7f7f7;
+      direction: rtl;
+      text-align: right;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      font-size: 18px;
+    }
+
+    button {
+      background: green;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #009900;
+      font-weight: bold;
+    }
+
+    .box {
+      background: white;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>إرسال الملاحظات</h2>
+
+  <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
+  <br />
+  <button onclick="sendNote()">إرسال</button>
+
+  <div id="status"></div>
+
+  <h3>الملاحظات الحالية</h3>
+  <div id="currentNotes" class="box">جاري التحميل...</div>
+
+  <script>
+    // ----------------------------------
+    // ⛔ ضع قيم مشروعك هنا فقط
+    // ----------------------------------
+    const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co";  
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08";
+
+    // إنشاء اتصال Supabase
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ----------------------
+    // إرسال الملاحظة
+    // ----------------------
+    async function sendNote() {
+  const text = document.getElementById("noteInput").value.trim();
+  if (!text) return;
+
+  const { error } = await supabase
+    .from("notes")
+    .update({ text: text })     // تحديث قيمة الحقل text
+    .eq("id", 2);               // تحديث السطر الذي id=2
+
+  if (!error) {
+    document.getElementById("status").innerHTML = "✔ تم تحديث الملاحظة بنجاح";
+    document.getElementById("noteInput").value = "";
+    loadNotes();
+  } else {
+    document.getElementById("status").innerHTML = "❌ خطأ بالتحديث";
+  }
+}
+
+
+    // ----------------------
+    // تحميل الملاحظات الحالية
+    // ----------------------
+    async function loadNotes() {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .order("id", { ascending: false });
+
+      if (error) {
+        document.getElementById("currentNotes").innerHTML = "خطأ بالتحميل";
+        return;
+      }
+
+      if (data.length === 0) {
+        document.getElementById("currentNotes").innerHTML = "لا توجد ملاحظات حاليا";
+        return;
+      }
+
+      let html = "";
+      data.forEach(n => {
+        html += `<div style="padding:8px 0;border-bottom:1px solid #ddd;">${n.text}</div>`;
+      });
+
+      document.getElementById("currentNotes").innerHTML = html;
+    }
+
+    // تحميل الملاحظات عند فتح الصفحة
+    loadNotes();
+  </script>
+
+</body>
+</html>
