@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <title>📺 الملاحظات اليومية</title>
 <style>
 body {
@@ -17,7 +22,7 @@ body {
 }
 
 .container {
-  width: 90%;
+  width: 100%;
   max-width: 900px;
   background: rgba(255,255,255,0.5);
   border-radius: 20px;
@@ -52,15 +57,19 @@ h1 {
   background-color: #45a049;
 }
 
-ul#view {
+ul#currentNotes {
   list-style-type: disc;
   padding-right: 20px;
   font-size: 32px;
   line-height: 1.6;
 }
 </style>
+
 </head>
 <body>
+<div class="container">
+  
+  <div id="status"></div>
 
 <div class="container">
   <div class="header">
@@ -70,17 +79,19 @@ ul#view {
       <button onclick="changeFontSize(-2)">A-</button>
     </div>
   </div>
-  <ul id="view"></ul>
+  <ul id="currentNotes"></ul>
 </div>
 
-<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
-<script>
-  const view = document.getElementById("view");
 
-  // ---------- التحكم بحجم الخط ----------
+
+
+  <script>
+
+
+// ---------- التحكم بحجم الخط ----------
   function changeFontSize(delta) {
-    const current = parseInt(window.getComputedStyle(view).fontSize);
-    view.style.fontSize = (current + delta) + "px";
+    const current = parseInt(window.getComputedStyle(currentNotes).fontSize);
+    currentNotes.style.fontSize = (current + delta) + "px";
   }
 
   // ---------- ألوان التدرج اليومية ----------
@@ -101,41 +112,67 @@ ul#view {
   const [color1, color2] = gradientColors[dayIndex];
   document.body.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
 
-  // ---------- تحميل الملاحظات من localStorage ----------
-  function loadNotes() {
-    const saved = localStorage.getItem("dailyNotes");
-    if(saved) {
-      const lines = saved.split('\n');
-      view.innerHTML = '';
+
+
+
+
+
+    // ----------------------------------
+    // ⛔ ضع قيم مشروعك هنا فقط
+    // ----------------------------------
+    const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co";  
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08";
+
+    // إنشاء اتصال Supabase
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  
+
+    // ----------------------
+    // تحميل الملاحظات الحالية
+    // ----------------------
+    async function loadNotes() {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .order("id", { ascending: false });
+
+      if (error) {
+        document.getElementById("currentNotes").innerHTML = "خطأ بالتحميل";
+        return;
+      }
+
+      if (data.length === 0) {
+        document.getElementById("currentNotes").innerHTML = "لا توجد ملاحظات حاليا";
+        return;
+      }
+
+      let html = "";
+      data.forEach(n => {
+        html += `${n.text}`;
+  if(html) {
+      const lines = html.split('\n');
+      currentNotes.innerHTML = '';
       lines.forEach(line => {
         if(line.trim() !== '') {
           const li = document.createElement('li');
           li.textContent = line;
-          view.appendChild(li);
+          currentNotes.appendChild(li);
         }
       });
     }
-  }
-  loadNotes();
 
-  // ---------- إعداد Ably ----------
-  const ably = new Ably.Realtime("d7XY8g.iffthg:fC1_V_gyW5XuWkef5gjz8WAQ68AwXA3k3e-SXIVTC0U");
-  const channel = ably.channels.get("notes");
+      });
 
-  channel.subscribe("new-note", msg => {
-    const lines = msg.data.text.split('\n');
-    view.innerHTML = '';
-    lines.forEach(line => {
-      if(line.trim() !== '') {
-        const li = document.createElement('li');
-        li.textContent = line;
-        view.appendChild(li);
-      }
-    });
-    // حفظ الملاحظات في localStorage
-    localStorage.setItem("dailyNotes", msg.data.text);
-  });
-</script>
+
+    }
+
+    // تحميل الملاحظات عند فتح الصفحة
+    loadNotes();
+
+
+
+  </script>
 
 </body>
 </html>

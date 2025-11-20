@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>📓 كتابة الملاحظات</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <title>📓 كتابة الملاحظات</title>
 <style>
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -26,13 +31,13 @@ body {
 }
 
 h1 {
-  text-align: center;
+  text-align: right;
   color: #333;
   margin-bottom: 20px;
 }
 
 textarea {
-  width: 100%;
+  width: 95%;
   height: 200px;
   font-size: 18px;
   padding: 15px;
@@ -93,72 +98,94 @@ ul#currentNotes li:hover {
   padding: 2px 5px;
 }
 </style>
+
 </head>
 <body>
-
 <div class="container">
-  <h1>✏️ اكتب ملاحظتك</h1>
-  <textarea id="note" placeholder="اكتب هنا..."></textarea>
-  <button onclick="send()">إرسال الملاحظة</button>
-  <div id="message">✅ تم إرسال الملاحظة بنجاح!</div>
+  <h1>✏️ اكتب ملاحظاتك:</h1>
 
-  <div id="currentNotesContainer">
-    <h2>الملاحظات الحالية (اضغط لتعديل)</h2>
-    <ul id="currentNotes"></ul>
-  </div>
+  <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
+  <br />
+  <button onclick="sendNote()">إرسال</button>
+
+  <div id="status"></div>
+
+  <h2>الملاحظات الحالية</h2>
+  <div id="currentNotes" class="box">جاري التحميل...</div>
 </div>
+  <script>
+    // ----------------------------------
+    // ⛔ ضع قيم مشروعك هنا فقط
+    // ----------------------------------
+    const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co";  
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08";
 
-<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
-<script>
-  const ably = new Ably.Realtime("d7XY8g.iffthg:fC1_V_gyW5XuWkef5gjz8WAQ68AwXA3k3e-SXIVTC0U");
-  const channel = ably.channels.get("notes");
-  const messageEl = document.getElementById("message");
-  const currentNotesUl = document.getElementById("currentNotes");
-  const noteTextarea = document.getElementById("note");
+    // إنشاء اتصال Supabase
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  function renderNotes(text) {
-    const lines = text.split('\n');
-    currentNotesUl.innerHTML = '';
-    lines.forEach(line => {
-      if(line.trim() !== '') {
-        const li = document.createElement('li');
-        li.textContent = line;
-        // ميزة النسخ السريع: عند الضغط، توضع في مربع الكتابة
-        li.addEventListener('click', () => {
-          noteTextarea.value = line;
-          noteTextarea.focus();
-        });
-        currentNotesUl.appendChild(li);
+    // ----------------------
+    // إرسال الملاحظة
+    // ----------------------
+   async function sendNote() {
+  const text = document.getElementById("noteInput").value.trim();
+  if (!text) return;
+
+  const { error } = await supabase
+    .from("notes")
+    .update({ text: text })     // تحديث قيمة الحقل text
+    .eq("id", 2);               // تحديث السطر الذي id=2
+
+  if (!error) {
+    document.getElementById("status").innerHTML = "✔ تم تحديث الملاحظة بنجاح";
+    document.getElementById("noteInput").value = "";
+    loadNotes();
+  } else {
+    document.getElementById("status").innerHTML = "❌ خطأ بالتحديث";
+  }
+}
+
+
+    // ----------------------
+    // تحميل الملاحظات الحالية
+    // ----------------------
+    async function loadNotes() {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .order("id", { ascending: false });
+
+      if (error) {
+        document.getElementById("currentNotes").innerHTML = "خطأ بالتحميل";
+        return;
       }
-    });
-  }
 
-  // ---------- تحميل الملاحظات من localStorage عند فتح الصفحة ----------
-  const savedNotes = localStorage.getItem("dailyNotes");
-  if(savedNotes) {
-    renderNotes(savedNotes);
-  }
+      if (data.length === 0) {
+        document.getElementById("currentNotes").innerHTML = "لا توجد ملاحظات حاليا";
+        return;
+      }
 
-  // ---------- عند استلام ملاحظة جديدة من Ably ----------
-  channel.subscribe("new-note", msg => {
-    const text = msg.data.text;
-    renderNotes(text);
-    localStorage.setItem("dailyNotes", text);
-  });
+      let html = "";
+      data.forEach(n => {
+        html += `${n.text}`;
+  if(html) {
+      const lines = html.split('\n');
+      currentNotes.innerHTML = '';
+      lines.forEach(line => {
+        if(line.trim() !== '') {
+          const li = document.createElement('li');
+          li.textContent = line;
+          currentNotes.appendChild(li);
+        }
+      });
+    }
 
-  // ---------- إرسال الملاحظة ----------
-  function send() {
-    const text = noteTextarea.value;
-    if(text.trim() === "") return;
+      });
 
-    channel.publish("new-note", { text });
+    }
 
-    messageEl.style.display = "block";
-    setTimeout(() => { messageEl.style.display = "none"; }, 2000);
-
-    noteTextarea.value = "";
-  }
-</script>
+    // تحميل الملاحظات عند فتح الصفحة
+    loadNotes();
+  </script>
 
 </body>
 </html>
