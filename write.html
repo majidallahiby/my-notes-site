@@ -84,19 +84,6 @@ button:hover {
   margin-bottom: 10px;
 }
 
-ul#currentNotes {
-  list-style-type: disc;
-  padding-right: 20px;
-  font-size: 18px;
-  line-height: 1.5;
-  cursor: pointer;
-}
-
-ul#currentNotes li:hover {
-  background-color: #e0ffe0;
-  border-radius: 5px;
-  padding: 2px 5px;
-}
 .header button {
 
   padding: 8px 15px;
@@ -115,6 +102,16 @@ ul#currentNotes li:hover {
   margin-bottom: 20px;
 }
 
+li {
+    background: #f2f2f2;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    }
+li:hover {
+    background: #e3ffe3;
+    }
 </style>
 
 </head>
@@ -122,12 +119,12 @@ ul#currentNotes li:hover {
 <div class="container">
  <div class="header">
   <h2>✏️ اكتب ملاحظاتك:</h2>
-<button onclick="showAlertMessage()" style="width:5px">!</button>
+<button id="about" onclick="showAlertMessage()" style="width:5px">!</button>
 </div>
   <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
 
   <br />
-  <button onclick="sendNote()">إرسال</button>
+  <button onclick="jood()">إرسال</button>
 
   <div id="status"></div>
 
@@ -153,6 +150,8 @@ ul#currentNotes li:hover {
   const messageEl = document.getElementById("message");
   const currentNotesUl = document.getElementById("currentNotes");
   const noteTextarea = document.getElementById("noteInput");
+  let editingNoteId =-1;
+  let oldtext;
 
   function renderNotes(text) {
     const lines = text.split('\n');
@@ -161,12 +160,7 @@ ul#currentNotes li:hover {
       if(line.trim() !== '') {
         const li = document.createElement('li');
         li.textContent = line;
-        // ميزة النسخ السريع: عند الضغط، توضع في مربع الكتابة
-        li.addEventListener('click', () => {
-          noteTextarea.value = line;
-          noteTextarea.focus();
-        });
-        currentNotesUl.appendChild(li);
+
       }
     });
   }
@@ -192,9 +186,17 @@ ul#currentNotes li:hover {
     // ----------------------
     // إرسال الملاحظة
     // ----------------------
-   async function sendNote() {
 
-  const text = document.getElementById("noteInput").value.trim();
+    async function jood()
+    {
+        if(editingNoteId===1)
+       { updateNote();  }
+        else
+       { sendNote(document.getElementById("noteInput").value.trim());   }
+       editingNoteId=-1;
+    }
+   async function sendNote(text) {
+
     if(text.trim() === "") return;
     channel.publish("new-note", { text });
   if (!text) return;
@@ -213,8 +215,26 @@ ul#currentNotes li:hover {
   }
 }
 
+   // --------------------------------
+   // تحديث فقرة
+    async function updateNote()
+    {
+        const newtext = document.getElementById("noteInput").value.trim();
+                 const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .order("id", { ascending: false });
+       let temp = "";
+      data.forEach(n => {
+       temp += `${n.text}`;
+     });
+        let n= temp.replaceAll(oldtext,newtext);
+        //document.getElementById("noteInput").value=n;
+        sendNote(n);
 
-    // ----------------------
+       }
+
+  // ----------------------
     // تحميل الملاحظات الحالية
     // ----------------------
     async function loadNotes() {
@@ -233,6 +253,7 @@ ul#currentNotes li:hover {
         return;
       }
 
+
       let html = "";
       data.forEach(n => {
         html += `${n.text}`;
@@ -243,18 +264,35 @@ ul#currentNotes li:hover {
         if(line.trim() !== '') {
           const li = document.createElement('li');
           li.textContent = line;
-          currentNotes.appendChild(li);
+        //  currentNotes.appendChild(li);
+
+                                          // 🔥 الميزة الجديدة: نقل النص مباشرة إلى مربع الكتابة
+                        li.addEventListener("click", () => {
+                            noteTextarea.value = line;
+                            noteTextarea.focus();
+                            editingNoteId=1;
+                            oldtext=line;
+                        });
+
+                        currentNotesUl.appendChild(li);
         }
       });
     }
 
       });
 
-    }
 
+    }
+    function addNoteToArray(content) {
+    if (content.trim() === "") return; // منع الفارغ
+    notesArray.push({
+
+        content: content
+    });
+        }
  function showAlertMessage() {
             // استخدام دالة alert() لعرض نافذة منبثقة
-            alert("Majid Allahiby IT\nmajid.allahiby@gmail.com\n9647807886708\n9647705278677");
+            alert("IT شعبة تقنية المعلومات\nمعمل اسمنت القائم\nماجد جمال اللهيبي\nاحمد ابراهيم الراوي\nعمر عاصم الراوي");
         }
     // تحميل الملاحظات عند فتح الصفحة
     loadNotes();

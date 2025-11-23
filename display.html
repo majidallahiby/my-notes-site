@@ -64,12 +64,42 @@ ul#currentNotes {
   font-size: 32px;
   line-height: 1.6;
 }
+#clock-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+#clock {
+  font-size: 40px;
+  font-weight: bold;
+  color: black;
+  text-shadow: 0 0 10px rgba(0,0,0,0.4);
+  font-family: "Arial", sans-serif;
+}
+
+#date {
+  font-size: 20px;
+  font-weight: bold;
+  color: black;
+  text-shadow: 0 0 10px rgba(0,0,0,0.4);
+  margin-top: 5px;
+  font-family: "Arial", sans-serif;
+}
+
+
 </style>
 
 </head>
 <body>
 <div class="container">
-  
+                 <div id="clock-container">
+  <div id="clock"></div>
+  <div id="date"></div>
+</div>
+
   <div id="status"></div>
 
 <div class="container">
@@ -88,6 +118,41 @@ ul#currentNotes {
 
 <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
 <script>
+
+
+function updateClock() {
+  const now = new Date();
+
+  let hours = now.getHours();
+  let minutes = now.getMinutes().toString().padStart(2, '0');
+  let seconds = now.getSeconds().toString().padStart(2, '0');
+
+  // تحويل 24 إلى 12
+  let ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours ? hours : 12; // معالجة رقم 0 → 12
+
+  hours = hours.toString().padStart(2, '0');
+
+  document.getElementById("clock").innerText =
+    `${hours}:${minutes}:${seconds} ${ampm}`;
+
+  // التاريخ
+  const day = now.getDate().toString().padStart(2, '0');
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const year = now.getFullYear();
+
+  document.getElementById("date").innerText =
+    `${day} / ${month} / ${year}`;
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+
+
+
+
   const view = document.getElementById("currentNotes");
 
   // ---------- إعداد Ably ----------
@@ -127,13 +192,40 @@ ul#currentNotes {
     ["#f7f7f7","#f8f0f0"], ["#f0f8f7","#f4f4f4"], ["#fbeee6","#f0f8f0"],
     ["#f4f4f4","#f0f4ff"], ["#f0f0f0","#fafaf0"], ["#f5f5dc","#f0fff0"]
   ];
+//  const today = new Date();
+//  const dayIndex = (today.getDate() - 1) % 30;
+//  const [color1, color2] = gradientColors[dayIndex];
+//  document.body.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+//------------------------
+// تغير لون الخلفية كل يوم ساعة 12
+
+function applyDailyGradient() {
   const today = new Date();
   const dayIndex = (today.getDate() - 1) % 30;
   const [color1, color2] = gradientColors[dayIndex];
   document.body.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+}
 
+applyDailyGradient(); // أول مرة عند فتح الصفحة
 
+// حساب الوقت المتبقي لمنتصف الليل القادم
+function scheduleMidnightUpdate() {
+  const now = new Date();
+  const nextMidnight = new Date();
 
+  nextMidnight.setHours(24, 0, 0, 0); // الساعة 12 بالليل القادمة
+
+  const msUntilMidnight = nextMidnight - now;
+
+  setTimeout(() => {
+    applyDailyGradient();   // يحدث اللون عند 12 بالضبط
+    setInterval(applyDailyGradient, 24 * 60 * 60 * 1000); // تحديث كل 24 ساعة بعد ذلك
+  }, msUntilMidnight);
+}
+
+scheduleMidnightUpdate();
+
+//------------------------------
 
 
 
@@ -192,7 +284,7 @@ function refreshPage() {
         }
  function showAlertMessage() {
             // استخدام دالة alert() لعرض نافذة منبثقة
-            alert("Majid Allahiby IT\nmajid.allahiby@gmail.com\n9647807886708\n9647705278677");
+            alert("IT شعبة تقنية المعلومات\nمعمل اسمنت القائم\nماجد جمال اللهيبي\nاحمد ابراهيم الراوي\nعمر عاصم الراوي");
         }
 
     // تحميل الملاحظات عند فتح الصفحة
