@@ -1,302 +1,298 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📓 اكتب ملاحظاتك (Realtime)</title>
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <title>📓 كتابة الملاحظات</title>
 <style>
+/* --- جسم الصفحة والمربع --- */
+/* --- جسم الصفحة والمربع --- */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f0f4f8;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  margin: 0;
-  padding-top: 50px;
-  direction: rtl;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 50px;
+    direction: rtl;
 }
 
 .container {
-  background: #fff;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-  width: 90%;
-  max-width: 600px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* يجعل المحتوى يمتد بعرض المربع */
 }
 
-h1 {
-  text-align: right;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-textarea {
-  width: 95%;
-  height: 200px;
-  font-size: 18px;
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  resize: none;
-  direction: rtl;
-  text-align: right;
-}
-
-button {
-  width: 100%;
-  padding: 15px;
-  margin-top: 15px;
-  font-size: 20px;
-  border: none;
-  border-radius: 10px;
-  background-color: #28a745; /* أخضر واضح */
-  color: white;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-button:hover {
-  background-color: #218838;
-}
-
-#message {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 18px;
-  color: #155724; /* أخضر نجاح */
-  display: none;
-}
-
-#currentNotesContainer {
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 2px solid #ccc;
-}
-
-#currentNotesContainer h2 {
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-
-.header button {
-
-  padding: 8px 15px;
-  font-size: 18px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  background-color: #4CAF50;
-  color: white;
-}
+/* --- العنوان مع أيقونة القلم --- */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* الكتابة على اليمين في العربية */
+    direction: rtl;
+    margin-bottom: 15px;
 }
 
-li {
-    background: #f2f2f2;
+.header h2 {
+    margin: 0;
+}
+
+.header img {
+    width: 24px;
+    height: 24px;
+    margin-left: 10px; /* فاصلة بين النص والقلم */
+}
+
+/* --- مربع النص --- */
+textarea {
+    width: 100%;
+    height: 150px;
     padding: 10px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    resize: none;
+    margin-bottom: 15px;
+}
+   /* --- حاوية الأزرار --- */
+.button-group {
+    display: flex;
+    justify-content: space-between; /* توزيع متساوي بينهم */
+    gap: 10px; /* مسافة صغيرة بين الأزرار */
+    margin-bottom: 15px;
+}
+
+/* --- الأزرار --- */
+.button-group button {
+    flex: 1; /* يجعل كل زر يأخذ نفس المساحة */
+    padding: 12px 0;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+/* ألوان الأزرار */
+#sendBtn { background-color: #28a745; }
+#editBtn { background-color: #ffc107; color: black; }
+#deleteBtn { background-color: #dc3545; }
+
+/* تأثير hover */
+.button-group button:hover {
+    filter: brightness(1.1);
+}
+
+/* تأثير الضغط */
+.button-group button:active {
+    filter: brightness(0.9);
+}
+
+
+/* --- قائمة الملاحظات --- */
+.notes-list {
+    margin-top: 20px;
+}
+
+.notes-list li {
+    background: #f2f2f2;
+    padding: 8px 12px;
     border-radius: 6px;
     margin-bottom: 6px;
     cursor: pointer;
-    }
-li:hover {
-    background: #e3ffe3;
-    }
-</style>
-
-</head>
-<body>
-<div class="container">
- <div class="header">
-  <h2>✏️ اكتب ملاحظاتك:</h2>
-<button id="about" onclick="showAlertMessage()" style="width:5px">!</button>
-</div>
-  <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
-
-  <br />
-  <button onclick="jood()">إرسال</button>
-
-  <div id="status"></div>
-
-
-
-
-  <h2>الملاحظات الحالية</h2>
-  <div id="currentNotes" class="box">جاري التحميل...</div>
-</div>
-
-
-
-
-<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
-
-
-
-
-  <script>
-
-  const ably = new Ably.Realtime("d7XY8g.iffthg:fC1_V_gyW5XuWkef5gjz8WAQ68AwXA3k3e-SXIVTC0U");
-  const channel = ably.channels.get("notes");
-  const messageEl = document.getElementById("message");
-  const currentNotesUl = document.getElementById("currentNotes");
-  const noteTextarea = document.getElementById("noteInput");
-  let editingNoteId =-1;
-  let oldtext;
-
-  function renderNotes(text) {
-    const lines = text.split('\n');
-    currentNotesUl.innerHTML = '';
-    lines.forEach(line => {
-      if(line.trim() !== '') {
-        const li = document.createElement('li');
-        li.textContent = line;
-
-      }
-    });
-  }
-
- 
-  // ---------- عند استلام ملاحظة جديدة من Ably ----------
-  channel.subscribe("new-note", msg => {
-    const text = msg.data.text;
-    renderNotes(text);
-
-  });
-
-
-    // ----------------------------------
-    // ⛔ ضع قيم مشروعك هنا فقط
-    // ----------------------------------
-    const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co";  
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08";
-
-    // إنشاء اتصال Supabase
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // ----------------------
-    // إرسال الملاحظة
-    // ----------------------
-
-    async function jood()
-    {
-        if(editingNoteId===1)
-       { updateNote();  }
-        else
-       { sendNote(document.getElementById("noteInput").value.trim());   }
-       editingNoteId=-1;
-    }
-   async function sendNote(text) {
-
-    if(text.trim() === "") return;
-    channel.publish("new-note", { text });
-  if (!text) return;
-
-  const { error } = await supabase
-    .from("notes")
-    .update({ text: text })     // تحديث قيمة الحقل text
-    .eq("id", 2);               // تحديث السطر الذي id=2
-
-  if (!error) {
-    document.getElementById("status").innerHTML = "✔ تم تحديث الملاحظة بنجاح";
-    document.getElementById("noteInput").value = "";
-    loadNotes();
-  } else {
-    document.getElementById("status").innerHTML = "❌ خطأ بالتحديث";
-  }
 }
 
-   // --------------------------------
-   // تحديث فقرة
-    async function updateNote()
-    {
-        const newtext = document.getElementById("noteInput").value.trim();
-                 const { data, error } = await supabase
+.notes-list li.selected {
+    background: #d1e7dd;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <img src="https://img.icons8.com/material-outlined/24/000000/pencil--v1.png" alt="قلم">
+        <h2>اكتب ملاحظاتك</h2>
+    </div>
+
+    <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
+    <div>
+        <div class="button-group">
+    <button id="sendBtn">إرسال</button>
+    <button id="editBtn">تعديل</button>
+    <button id="deleteBtn">حذف</button>
+</div>
+
+    </div>
+
+    <ul class="notes-list" id="notesList"></ul>
+</div>
+
+<script>
+const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08"; // ضع هنا ANON_KEY
+window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+const noteInput = document.getElementById("noteInput");
+const sendBtn = document.getElementById("sendBtn");
+const editBtn = document.getElementById("editBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+const notesList = document.getElementById("notesList");
+
+let selectedNoteId = null;
+
+/* ------------------- تحميل الملاحظات ------------------- */
+async function loadNotes() {
+    const { data, error } = await supabaseClient
         .from("notes")
         .select("*")
-        .order("id", { ascending: false });
-       let temp = "";
-      data.forEach(n => {
-       temp += `${n.text}`;
-     });
-        let n= temp.replaceAll(oldtext,newtext);
-        //document.getElementById("noteInput").value=n;
-        sendNote(n);
+        .order("id", { ascending: true });
 
-       }
+    if (error) { alert("خطأ في تحميل الملاحظات"); return; }
 
-  // ----------------------
-    // تحميل الملاحظات الحالية
-    // ----------------------
-    async function loadNotes() {
-      const { data, error } = await supabase
-        .from("notes")
-        .select("*")
-        .order("id", { ascending: false });
+    notesList.innerHTML = "";
+   // data.forEach(note => addNoteToList(note));
 
-      if (error) {
-        document.getElementById("currentNotes").innerHTML = "خطأ بالتحميل";
-        return;
-      }
+    data.forEach(n => {
+        const li = document.createElement("li");
 
-      if (data.length === 0) {
-        document.getElementById("currentNotes").innerHTML = "لا توجد ملاحظات حاليا";
-        return;
-      }
+        // النص + التاريخ
+        const time = new Date(n.updated_at).toLocaleString('en-EG', {
+            hour12: true,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
 
+        li.innerHTML = `<span class="note-text">${n.text}</span>
+                                        <span class="note-time">(${time})</span>`;
+      /*
+        // اختيار الملاحظة للتعديل
+        li.addEventListener("click", () => {
+            noteInput.value = n.text;
+            selectedNoteId = n.id;
+        });
+             */
+        li.addEventListener("click", () => {
 
-      let html = "";
-      data.forEach(n => {
-        html += `${n.text}`;
-  if(html) {
-      const lines = html.split('\n');
-      currentNotes.innerHTML = '';
-      lines.forEach(line => {
-        if(line.trim() !== '') {
-          const li = document.createElement('li');
-          li.textContent = line;
-        //  currentNotes.appendChild(li);
-
-                                          // 🔥 الميزة الجديدة: نقل النص مباشرة إلى مربع الكتابة
-                        li.addEventListener("click", () => {
-                            noteTextarea.value = line;
-                            noteTextarea.focus();
-                            editingNoteId=1;
-                            oldtext=line;
-                        });
-
-                        currentNotesUl.appendChild(li);
-        }
-      });
-    }
-
-      });
-
-
-    }
-    function addNoteToArray(content) {
-    if (content.trim() === "") return; // منع الفارغ
-    notesArray.push({
-
-        content: content
+    // إزالة التحديد من جميع الملاحظات
+    document.querySelectorAll(".notes-list li").forEach(item => {
+        item.classList.remove("selected");
     });
-        }
- function showAlertMessage() {
-            // استخدام دالة alert() لعرض نافذة منبثقة
-            alert("IT شعبة تقنية المعلومات\nمعمل اسمنت القائم\nماجد جمال اللهيبي\nاحمد ابراهيم الراوي\nعمر عاصم الراوي");
-        }
-    // تحميل الملاحظات عند فتح الصفحة
+
+    // إضافة التحديد للملاحظة الحالية
+    li.classList.add("selected");
+
+    // تحميل النص في مربع الكتابة
+      noteInput.value = n.text;
+      selectedNoteId = n.id;
+      });
+
+        notesList.appendChild(li);
+    });
+
+ }
+
+/* ------------------- إضافة ملاحظة للقائمة ------------------- */
+function addNoteToList(note) {
+    const li = document.createElement("li");
+    li.textContent = note.text;
+    li.dataset.id = note.id;
+
+    li.addEventListener("click", () => {
+        selectedNoteId = note.id;
+        noteInput.value = note.text;
+
+        notesList.querySelectorAll("li").forEach(el => el.classList.remove("selected"));
+        li.classList.add("selected");
+    });
+
+    // إزالة إذا موجودة مسبقاً
+    const existing = notesList.querySelector(`li[data-id='${note.id}']`);
+    if (existing) existing.replaceWith(li);
+    else notesList.appendChild(li);
+}
+
+/* ------------------- زر الإرسال ------------------- */
+sendBtn.addEventListener("click", async () => {
+    const text = noteInput.value.trim();
+    if (!text) return;
+
+    const { data, error } = await supabaseClient.from("notes").insert([{ text: text, created_at: new Date(), updated_at: new Date() }]);
+    if (error) { alert("خطأ في الإرسال"); return; }
+
+    noteInput.value = "";
+    selectedNoteId = null;
+
     loadNotes();
-  </script>
+});          
+
+/* ------------------- زر التعديل ------------------- */
+editBtn.addEventListener("click", async () => {
+    const newtext = noteInput.value.trim();
+    if (!newtext || !selectedNoteId) return;
+
+    const { data, error } = await supabaseClient
+        .from("notes")
+        .update({ text: newtext , updated_at: new Date() })
+        .eq("id", selectedNoteId);
+
+    if (error) { alert("خطأ في التعديل"); return; }
+
+    noteInput.value = "";
+    selectedNoteId = null;
+    loadNotes();
+
+});
+
+/* ------------------- زر الحذف ------------------- */
+deleteBtn.addEventListener("click", async () => {
+    if (!selectedNoteId) return;
+
+    const { data, error } = await supabaseClient
+        .from("notes")
+        .delete()
+        .eq("id", selectedNoteId);
+
+    if (error) { alert("خطأ في الحذف"); return; }
+
+    noteInput.value = "";
+    selectedNoteId = null;
+    loadNotes();
+});
+
+/* ------------------- Realtime ------------------- */
+supabaseClient
+    .channel('public:notes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, payload => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            addNoteToList(payload.new);
+        } else if (payload.eventType === 'DELETE') {
+            const li = notesList.querySelector(`li[data-id='${payload.old.id}']`);
+            if (li) li.remove();
+        }
+    })
+    .subscribe();
+
+/* ------------------- تحميل أولي ------------------- */
+loadNotes();
+</script>
 
 </body>
 </html>

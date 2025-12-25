@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📓 عرض الملاحظات (Realtime)</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 50px;
+    direction: rtl;
+    font-size: 24px; /* بدل 16px سابقًا */
+}
+    .container {
+    background: #fff;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+
+    /* حجم المربع ملائم للشاشة */
+    width: 90%;            /* 90% من عرض الشاشة */
+
+
+    height: auto;          /* الارتفاع حسب المحتوى */
+    max-height: 80vh;      /* أقصى ارتفاع 80% من ارتفاع الشاشة */
+    overflow-y: auto;      /* شريط تمرير إذا زاد المحتوى */
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+ .header {
+    display: flex;
+    justify-content: space-between; /* العنوان جهة اليمين والأزرار جهة اليسار */
+    align-items: center;
+    direction: rtl;
+    margin-bottom: 15px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left h2 {
+    margin: 0;
+    order: 2;
+}
+
+.header-left img {
+    width: 24px;
+    height: 24px;
+    margin-left: 10px;
+    order: 1;
+}
+
+
+.header-center {
+    flex: 1;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+
+.header-right {
+    display: flex;
+    gap: 5px; /* مسافة صغيرة بين الأزرار */
+}
+
+.header-right button {
+    padding: 6px 10px; /* صغير الحجم */
+    font-size: 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #28a745; /* اللون الافتراضي */
+    color: white;
+}
+
+/* تأثير hover و active */
+.header-right button:hover { filter: brightness(1.1); }
+.header-right button:active { filter: brightness(0.9); }
+
+/* إذا أردت تخصيص لون لكل زر */
+#increaseFont { background-color: #28a745; }
+#decreaseFont { background-color: #ffc107; color: black; }
+#showMsg { background-color: #dc3545; }
+
+
+
+.notes-list { margin-top: 20px; }
+
+.notes-list li {
+    background: #f2f2f2;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+   <div class="header">
+    <div class="header-left">
+        <h2>الملاحظات الحالية</h2>
+        <img src="https://img.icons8.com/material-outlined/24/000000/pencil--v1.png" alt="قلم">
+    </div>
+                              <!-- الساعة في الوسط -->
+    <div class="header-center">
+        <span id="clock">00:00:00 AM</span>
+    </div>
+    <div class="header-right">
+        <button id="increaseFont">+</button>
+        <button id="decreaseFont">-</button>
+        <button id="showMsg">!</button>
+    </div>
+</div>
+
+    <ul class="notes-list" id="notesList"></ul>
+</div>
+
+<script>
+/* ------------------- إعداد Supabase ------------------- */
+const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08"; // ضع هنا ANON_KEY
+window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const notesList = document.getElementById("notesList");
+/*--------------دالة تنسيق التاريخ------------------------*/
+function formatDate(dateString) {
+    const d = new Date(dateString);
+    return d.toLocaleString("en-EG", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    });
+}
+
+
+
+
+
+
+
+/* ------------------- تحميل الملاحظات ------------------- */
+async function loadNotes() {
+    const { data, error } = await supabaseClient
+        .from("notes")
+        .select("*")
+        .order("id", { ascending: true });
+
+    if (error) { alert("خطأ في تحميل الملاحظات"); return; }
+
+    notesList.innerHTML = "";
+    //data.forEach(note => addNoteToList(note));
+    data.forEach(n => {
+    const li = document.createElement("li");
+
+    const noteText = document.createElement("span");
+    noteText.className = "note-text";
+    noteText.textContent = n.text;
+
+    const noteTime = document.createElement("span");
+    noteTime.className = "note-time";
+    noteTime.textContent =" (";
+    noteTime.textContent += formatDate(n.updated_at || n.created_at);
+    noteTime.textContent +=")";
+
+
+    li.appendChild(noteText);
+    li.appendChild(noteTime);
+
+    notesList.appendChild(li);
+});
+
+}
+/* ------------------- إضافة ملاحظة للقائمة ------------------- */
+function addNoteToList(note) {
+    const li = document.createElement("li");
+    li.textContent = note.text;
+    li.dataset.id = note.id;
+
+    // إزالة إذا موجودة مسبقاً
+    const existing = notesList.querySelector(`li[data-id='${note.id}']`);
+    if (existing) existing.replaceWith(li);
+    else notesList.appendChild(li);
+}
+
+/* ------------------- Realtime ------------------- */
+supabaseClient
+    .channel('public:notes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, payload => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            addNoteToList(payload.new);
+        } else if (payload.eventType === 'DELETE') {
+            const li = notesList.querySelector(`li[data-id='${payload.old.id}']`);
+            if (li) li.remove();
+        }
+    })
+    .subscribe();
+
+/* ------------------- تحميل أولي ------------------- */
+loadNotes();
+
+
+
+
+//const notesList = document.querySelector(".notes-list");
+let currentFontSize = 24; // حجم الخط الافتراضي
+
+document.getElementById("increaseFont").addEventListener("click", () => {
+    currentFontSize += 2;
+    notesList.style.fontSize = currentFontSize + "px";
+});
+
+document.getElementById("decreaseFont").addEventListener("click", () => {
+    if(currentFontSize > 8) currentFontSize -= 2;
+    notesList.style.fontSize = currentFontSize + "px";
+});
+
+document.getElementById("showMsg").addEventListener("click", () => {
+    alert("تصميم ماجد اللهيبي");
+});
+
+
+function updateClock() {
+    const clockEl = document.getElementById("clock");
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // الساعة 12 بدل 0
+
+    const formattedTime =
+        String(hours).padStart(2,'0') + ":" +
+        String(minutes).padStart(2,'0') + ":" +
+        String(seconds).padStart(2,'0') + " " + ampm;
+
+    clockEl.textContent = formattedTime;
+}
+
+// تحديث كل ثانية
+setInterval(updateClock, 1000);
+updateClock(); // استدعاء فور تحميل الصفحة
+
+
+
+</script>
+
+</body>
+</html>
