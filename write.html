@@ -100,22 +100,48 @@ textarea {
 }
 
 
-/* --- قائمة الملاحظات --- */
+     /* --- قائمة الملاحظات --- */
 .notes-list {
     margin-top: 20px;
 }
 
 .notes-list li {
     background: #f2f2f2;
-    padding: 8px 12px;
+    padding: 10px 12px;
     border-radius: 6px;
     margin-bottom: 6px;
     cursor: pointer;
+    transition: background 0.2s ease;
 }
 
+/* التحديد */
 .notes-list li.selected {
     background: #d1e7dd;
 }
+
+/* نص الملاحظة */
+.note-text {
+    line-height: 1.5;
+}
+
+/* التاريخ (مخفي افتراضيًا) */
+.note-time {
+    font-size: 16px;
+    color: #666;
+    margin-top: 4px;
+    display: none;
+}
+
+/* يظهر عند hover */
+.notes-list li:hover .note-time {
+    display: block;
+}
+
+/* يظهر عند التحديد */
+.notes-list li.selected .note-time {
+    display: block;
+}
+
 
 </style>
 </head>
@@ -241,7 +267,7 @@ sendBtn.addEventListener("click", async () => {
     selectedNoteId = null;
 
     loadNotes();
-});          
+});
 
 /* ------------------- زر التعديل ------------------- */
 editBtn.addEventListener("click", async () => {
@@ -289,7 +315,6 @@ supabaseClient
         }
     })
     .subscribe();
-
 /* ------------------- تحميل أولي ------------------- */
 loadNotes();
 </script>

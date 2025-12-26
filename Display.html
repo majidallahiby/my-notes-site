@@ -10,7 +10,7 @@
 <style>
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f4f8;
+    background: #f0f0f0;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -21,7 +21,7 @@ body {
     font-size: 24px; /* بدل 16px سابقًا */
 }
     .container {
-    background: #fff;
+    background: #f8f8f8;
     padding: 25px;
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
@@ -79,14 +79,12 @@ body {
 }
 
 .header-right button {
-    padding: 6px 10px; /* صغير الحجم */
-    font-size: 14px;
+    padding: 6px 35px; /* صغير الحجم */
+    font-size: 24px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    background-color: #28a745; /* اللون الافتراضي */
-    color: white;
 }
 
 /* تأثير hover و active */
@@ -97,25 +95,108 @@ body {
 #increaseFont { background-color: #28a745; }
 #decreaseFont { background-color: #ffc107; color: black; }
 #showMsg { background-color: #dc3545; }
+#darkmode { background-color:#303030; color:#FAFAFA; }
 
 
 
-.notes-list { margin-top: 20px; }
+     /* --- قائمة الملاحظات --- */
+.notes-list {
+    margin-top: 20px;
+}
 
 .notes-list li {
     background: #f2f2f2;
-    padding: 8px 12px;
+    padding: 10px 12px;
     border-radius: 6px;
     margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
 }
+
+/* التحديد */
+.notes-list li.selected {
+    background: #d1e7dd;
+}
+
+/* نص الملاحظة */
+.note-text {
+    line-height: 1.5;
+}
+
+/* التاريخ (مخفي افتراضيًا) */
+.note-time {
+    font-size: 16px;
+    color: #666;
+    margin-top: 4px;
+    display: none;
+}
+
+/* يظهر عند hover */
+.notes-list li:hover .note-time {
+    display: block;
+}
+
+/* يظهر عند التحديد */
+.notes-list li.selected .note-time {
+    display: block;
+}
+
+
+
+body.dark-mode {
+    background: #121212;
+    color: #eaeaea;
+}
+
+body.dark-mode .container {
+    background: #1e1e1e;
+}
+
+body.dark-mode .notes-list li {
+    background: #2a2a2a;
+    color: #f1f1f1;
+}
+
+body.dark-mode .notes-list li.selected {
+    background: #355f4b;
+}
+
+body.dark-mode textarea {
+    background: #2a2a2a;
+    color: #fff;
+    border-color: #444;
+}
+
+body.dark-mode .note-time {
+    color: #aaa;
+}
+
+body.dark-mode button {
+    background: #333;
+    color: #fff;
+}
+
+body.dark-mode button:hover {
+    background: #444;
+}
+
+body.dark-mode button:active {
+    background: #222;
+}
+body.dark-mode #darkmode{
+    background: #f0f0f0;
+}
+
+
+
 </style>
 </head>
-<body>
+<body id="bb">
 
 <div class="container">
    <div class="header">
     <div class="header-left">
-        <h2>الملاحظات الحالية</h2>
+        <h2>الملاحظات اليومية</h2>
         <img src="https://img.icons8.com/material-outlined/24/000000/pencil--v1.png" alt="قلم">
     </div>
                               <!-- الساعة في الوسط -->
@@ -126,12 +207,15 @@ body {
         <button id="increaseFont">+</button>
         <button id="decreaseFont">-</button>
         <button id="showMsg">!</button>
+        <button id="darkmode">🌙</button>
+
     </div>
 </div>
 
-    <ul class="notes-list" id="notesList"></ul>
-</div>
+    <ul class="notes-list" id="notesList"> </li>
 
+    </ul>
+</div>
 <script>
 /* ------------------- إعداد Supabase ------------------- */
 const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
@@ -151,8 +235,6 @@ function formatDate(dateString) {
         day: "2-digit"
     });
 }
-
-
 
 
 
@@ -190,6 +272,7 @@ async function loadNotes() {
 });
 
 }
+
 /* ------------------- إضافة ملاحظة للقائمة ------------------- */
 function addNoteToList(note) {
     const li = document.createElement("li");
@@ -212,9 +295,9 @@ supabaseClient
             const li = notesList.querySelector(`li[data-id='${payload.old.id}']`);
             if (li) li.remove();
         }
+    loadNotes();
     })
     .subscribe();
-
 /* ------------------- تحميل أولي ------------------- */
 loadNotes();
 
@@ -237,6 +320,23 @@ document.getElementById("decreaseFont").addEventListener("click", () => {
 document.getElementById("showMsg").addEventListener("click", () => {
     alert("تصميم ماجد اللهيبي");
 });
+
+
+const themeBtn = document.getElementById("darkmode");
+
+themeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+
+    // تغيير الأيقونة حسب الوضع
+    if (document.body.classList.contains("dark-mode")) {
+        themeBtn.textContent = "☀️";
+    } else {
+        themeBtn.textContent = "🌙";
+    }
+});
+
+
+
 
 
 function updateClock() {
