@@ -8,6 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f0f0;
@@ -20,6 +22,21 @@ body {
     direction: rtl;
     font-size: 24px; /* بدل 16px سابقًا */
 }
+
+#screenNoise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* ما يوقف أي تفاعل */
+    background-image: url(''); /* نملأه بالـ JS */
+    opacity: 0.5; /* شفاف جداً */
+    z-index: 9999;
+}
+
+
+
     .container {
     background: #f8f8f8;
     padding: 25px;
@@ -99,19 +116,42 @@ body {
 
 
 
-     /* --- قائمة الملاحظات --- */
+.notes-scroll-wrapper {
+    height: 300px; /* أو حسب مساحة الصفحة */
+    overflow: hidden; /* يخفي ما يخرج عن المربع */
+    position: relative;
+}
+
 .notes-list {
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: -100%; /* البداية من أسفل */
+    animation: scrollNotes 25s linear infinite;
 }
 
 .notes-list li {
-    background: #f2f2f2;
+    margin-bottom: 6px;
     padding: 10px 12px;
     border-radius: 6px;
-    margin-bottom: 6px;
+    background: #f2f2f2;
     cursor: pointer;
     transition: background 0.2s ease;
 }
+
+@keyframes scrollNotes {
+    0%   { bottom: -100%; }
+    100% { bottom: 100%; } /* تتحرك لأعلى خارج المربع */
+}
+
+
+
+.notes-scroll-wrapper:hover .notes-list {
+    animation-play-state: paused;
+}
+
+
+
 
 /* التحديد */
 .notes-list li.selected {
@@ -191,7 +231,8 @@ body.dark-mode #darkmode{
 
 </style>
 </head>
-<body id="bb">
+<body>
+    <div id="screenNoise"></div>
 
 <div class="container">
    <div class="header">
@@ -212,9 +253,15 @@ body.dark-mode #darkmode{
     </div>
 </div>
 
+<div class="notes-scroll-wrapper">
+
+
     <ul class="notes-list" id="notesList"> </li>
 
     </ul>
+
+    </div>
+
 </div>
 <script>
 /* ------------------- إعداد Supabase ------------------- */
@@ -334,6 +381,36 @@ themeBtn.addEventListener("click", () => {
         themeBtn.textContent = "🌙";
     }
 });
+
+/* .......................................................*/
+const noiseDiv = document.getElementById('screenNoise');
+
+function generateNoise() {
+    const canvas = document.createElement('canvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    const imageData = ctx.createImageData(canvas.width, canvas.height);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        const shade = Math.floor(Math.random() * 256);
+        imageData.data[i] = shade;
+        imageData.data[i + 1] = shade;
+        imageData.data[i + 2] = shade;
+        imageData.data[i + 3] = 15; // 0-255, الشفافية قليلة
+    }
+    ctx.putImageData(imageData, 0, 0);
+    noiseDiv.style.backgroundImage = `url(${canvas.toDataURL()})`;
+}
+
+// كل نصف ثانية نغير الضوضاء
+setInterval(generateNoise, 5000);
+
+/*.......................................................*/
+
+
+
+
 
 
 
