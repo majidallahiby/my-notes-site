@@ -100,18 +100,33 @@ textarea {
 }
 
 
-     /* --- قائمة الملاحظات --- */
+
+.notes-scroll-wrapper {
+    height: 300px; /* أو حسب مساحة الصفحة */
+    overflow: hidden; /* يخفي ما يخرج عن المربع */
+    position: relative;
+}
+
 .notes-list {
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: -100%; /* البداية من أسفل */
+    animation: scrollNotes 25s linear infinite;
 }
 
 .notes-list li {
-    background: #f2f2f2;
+    margin-bottom: 6px;
     padding: 10px 12px;
     border-radius: 6px;
-    margin-bottom: 6px;
+    background: #f2f2f2;
     cursor: pointer;
     transition: background 0.2s ease;
+}
+
+@keyframes scrollNotes {
+    0%   { bottom: -100%; }
+    100% { bottom: 100%; } /* تتحرك لأعلى خارج المربع */
 }
 
 /* التحديد */
@@ -162,8 +177,12 @@ textarea {
 </div>
 
     </div>
+    <div class="notes-scroll-wrapper">
 
     <ul class="notes-list" id="notesList"></ul>
+</div>
+
+
 </div>
 
 <script>
@@ -302,6 +321,26 @@ deleteBtn.addEventListener("click", async () => {
     selectedNoteId = null;
     loadNotes();
 });
+
+/*.......................................................*/
+const notesList2 = document.querySelector('.notes-list');
+
+notesList.addEventListener('mouseenter', (e) => {
+    if(e.target.tagName === 'LI') {
+        notesList2.style.animationPlayState = 'paused';
+    }
+}, true);
+
+notesList.addEventListener('mouseleave', (e) => {
+    if(e.target.tagName === 'LI') {
+        notesList2.style.animationPlayState = 'running';
+    }
+}, true);
+
+/*......................................................*/
+
+
+
 
 /* ------------------- Realtime ------------------- */
 supabaseClient

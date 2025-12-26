@@ -146,9 +146,7 @@ body {
 
 
 
-.notes-scroll-wrapper:hover .notes-list {
-    animation-play-state: paused;
-}
+
 
 
 
@@ -408,7 +406,22 @@ setInterval(generateNoise, 5000);
 
 /*.......................................................*/
 
+/*.......................................................*/
+const notesList2 = document.querySelector('.notes-list');
 
+notesList.addEventListener('mouseenter', (e) => {
+    if(e.target.tagName === 'LI') {
+        notesList2.style.animationPlayState = 'paused';
+    }
+}, true);
+
+notesList.addEventListener('mouseleave', (e) => {
+    if(e.target.tagName === 'LI') {
+        notesList2.style.animationPlayState = 'running';
+    }
+}, true);
+
+/*......................................................*/
 
 
 
@@ -434,6 +447,9 @@ function updateClock() {
 
     clockEl.textContent = formattedTime;
 }
+
+
+
 
 // تحديث كل ثانية
 setInterval(updateClock, 1000);
