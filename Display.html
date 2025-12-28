@@ -117,7 +117,7 @@ body {
 
 
 .notes-scroll-wrapper {
-    height: 300px; /* أو حسب مساحة الصفحة */
+    height: 600px; /* أو حسب مساحة الصفحة */
     overflow: hidden; /* يخفي ما يخرج عن المربع */
     position: relative;
 }
@@ -227,6 +227,26 @@ body.dark-mode #darkmode{
 
 
 
+.editor-credit {
+    width:100%;
+    text-align:center;
+    font-size:12px;
+    color:#888;
+    padding:5px 0 15px 0;
+    opacity:0.8;
+}
+
+.footer {
+    width:100%;
+    text-align:center;
+    padding:1px 0;
+    font-size:11px;
+    color:#ccc;
+    border-top:1px solid rgba(255,255,255,0.2);
+}
+
+
+
 </style>
 </head>
 <body>
@@ -235,9 +255,13 @@ body.dark-mode #darkmode{
 <div class="container">
    <div class="header">
     <div class="header-left">
-        <h2>الملاحظات اليومية</h2>
-        <img src="https://img.icons8.com/material-outlined/24/000000/pencil--v1.png" alt="قلم">
+          <h2 class="page-title">
+ 📝 الملاحظات اليومية
+</h2>
+
     </div>
+
+
                               <!-- الساعة في الوسط -->
     <div class="header-center">
         <span id="clock">00:00:00 AM</span>
@@ -260,7 +284,9 @@ body.dark-mode #darkmode{
 
     </div>
 
-</div>
+
+
+
 <script>
 /* ------------------- إعداد Supabase ------------------- */
 const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
@@ -363,7 +389,7 @@ document.getElementById("decreaseFont").addEventListener("click", () => {
 });
 
 document.getElementById("showMsg").addEventListener("click", () => {
-    alert("تصميم ماجد اللهيبي");
+        alert("تصميم وتنفذ شعبة تقنية المعلومات ");
 });
 
 
@@ -395,7 +421,7 @@ function generateNoise() {
         imageData.data[i] = shade;
         imageData.data[i + 1] = shade;
         imageData.data[i + 2] = shade;
-        imageData.data[i + 3] = 15; // 0-255, الشفافية قليلة
+        imageData.data[i + 3] = 20; // 0-255, الشفافية قليلة
     }
     ctx.putImageData(imageData, 0, 0);
     noiseDiv.style.backgroundImage = `url(${canvas.toDataURL()})`;
@@ -458,6 +484,8 @@ updateClock(); // استدعاء فور تحميل الصفحة
 
 
 </script>
+
+
 
 </body>
 </html>
