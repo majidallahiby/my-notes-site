@@ -8,20 +8,112 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-
-
-body {
+    body {
+    display: flex;
+    flex-direction: column; /* header + container + footer يتحركون مع بعض */
+    align-items: center;    /* محتوى الصفحة بالوسط */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
+        min-height: 90vh;
     margin: 0;
-    padding-top: 50px;
-    direction: rtl;
-    font-size: 24px; /* بدل 16px سابقًا */
+    padding: 0;
+    font-size: 24px;
 }
+
+.header {
+    position: relative; /* أو احذف السطر نهائيًا */
+   width: 90%;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+}
+
+
+/* ================= header ================= */
+
+.header-left {
+    justify-self: start;  /* العنوان جهة اليمين */
+}
+
+.header-center {
+    justify-self: center; /* الساعة بالوسط */
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.header-right {
+    justify-self: end;    /* الأزرار جهة اليسار */
+    display: flex;
+    gap: 5px;
+}
+
+/* ================= footer ================= */
+.app-footer {
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    max-width: 600px;
+    margin: 15px auto 20px auto; /* يتبع الـ container */
+    direction: rtl;
+}
+
+
+.app-footerrrr {
+    position: fixed;
+    bottom: 8px;
+    font-size: 14px;
+    color: #666;
+    opacity: 0.8;
+    pointer-events: none;
+    direction: rtl;
+    display: flex;
+    transition: opacity 0.3s ease;
+    left: 50px;
+    right: 50px;
+}
+
+.app-footer .footer-center {
+    margin: 0 auto;
+}
+
+.app-footer .footer-right {
+    white-space: nowrap;
+}
+
+body.dark-mode .app-footer {
+    color: #aaa;
+}
+
+ .headerrrr {
+    display: flex;
+    justify-content: space-between; /* العنوان جهة اليمين والأزرار جهة اليسار */
+    align-items: center;
+    direction: rtl;
+    margin-bottom: 15px;
+    text-align: center;
+    position: fixed;
+    top: 0;
+    right: 3.5%;
+    left: 3.5%;
+  /*  z-index: 1000;       */
+}
+
+
+.header-right button {
+    padding: 4px 4px; /* صغير الحجم */
+    font-size: 24px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* تأثير hover و active */
+.header-right button:hover { filter: brightness(1.1); }
+.header-right button:active { filter: brightness(0.9); }
+
 
 #screenNoise {
     position: fixed;
@@ -39,7 +131,6 @@ body {
 
     .container {
     background: #f8f8f8;
-    padding: 25px;
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 
@@ -56,63 +147,13 @@ body {
     align-items: stretch;
 }
 
- .header {
-    display: flex;
-    justify-content: space-between; /* العنوان جهة اليمين والأزرار جهة اليسار */
-    align-items: center;
-    direction: rtl;
-    margin-bottom: 15px;
-}
 
-.header-left {
-    display: flex;
-    align-items: center;
-}
-
-.header-left h2 {
-    margin: 0;
-    order: 2;
-}
-
-.header-left img {
-    width: 24px;
-    height: 24px;
-    margin-left: 10px;
-    order: 1;
-}
-
-
-.header-center {
-    flex: 1;
-    text-align: center;
-    font-size: 30px;
-    font-weight: bold;
-}
-
-
-.header-right {
-    display: flex;
-    gap: 5px; /* مسافة صغيرة بين الأزرار */
-}
-
-.header-right button {
-    padding: 6px 35px; /* صغير الحجم */
-    font-size: 24px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-/* تأثير hover و active */
-.header-right button:hover { filter: brightness(1.1); }
-.header-right button:active { filter: brightness(0.9); }
 
 /* إذا أردت تخصيص لون لكل زر */
 #toggleScroll { background-color: #9c27b0; }
 #increaseFont { background-color: #28a745; }
 #decreaseFont { background-color: #ffc107; color: black; }
-#showMsg { background-color: #dc3545; }
+#showMsg { background-color: #1B36CC; }
 #darkmode { background-color:#303030; color:#FAFAFA; }
 
 .notes-scroll-wrapper {
@@ -127,6 +168,10 @@ body {
     top: 0;
 }
 
+.notes-scroll-wrapper.scrollable {
+    overflow-y: auto; /* عند توقف الحركة */
+}
+
 
 
 
@@ -137,6 +182,13 @@ body {
     background: #f2f2f2;
     cursor: pointer;
     transition: background 0.2s ease;
+
+    /* --- أضف هذه الأسطر --- */
+    overflow-wrap: break-word; /* يقسم الكلمات الطويلة */
+    word-wrap: break-word;     /* دعم قديم */
+    hyphens: auto;             /* يسمح بفواصل في الكلمات إذا ممكن */
+    max-width: 95%;           /* لا تتجاوز عرض container */
+    box-sizing: border-box;    /* يشمل padding ضمن العرض */
 }
 
 
@@ -177,7 +229,6 @@ body {
     animation: none !important;
     position: static;
 }
-
 
 
 
@@ -226,30 +277,25 @@ body.dark-mode #darkmode{
 }
 
 
-.app-footer {
+
+
+
+/* Flash */
+#screenFlash {
     position: fixed;
-    bottom: 8px;
+    top: 0;
+    left: 0;
     width: 100%;
-    font-size: 14px;
-    color: #666;
-    opacity: 0.8;
-    pointer-events: none;
-    direction: rtl;
-    display: flex;
-    transition: opacity 0.3s ease;
+    height: 100%;
+    pointer-events: none; /* لا يعيق أي تفاعل */
+    background-color: rgba(0, 0, 0, 0.5); /* اللون الافتراضي للتنبيه */
+    opacity: 0;
+    z-index: 9999;
+    transition: opacity 0.1s ease; /* تأثير fade-in/out */
 }
 
-.app-footer .footer-center {
-    margin: 0 auto;
-    pointer-events: auto;
-}
-
-.app-footer .footer-right {
-    pointer-events:auto;
-}
-
-body.dark-mode .app-footer {
-    color: #aaa;
+body.dark-mode #screenFlash {
+    background-color: rgba(255, 255, 255, 0.5); /* لون مناسب للوضع المظلم */
 }
 
 
@@ -257,16 +303,8 @@ body.dark-mode .app-footer {
 
 </style>
 </head>
-<footer class="app-footer">
-    <span class="footer-center">© <span id="year"></span> جميع الحقوق محفوظة – تصميم وتنفيذ شعبة تقنية المعلومات (IT)</span>
-    <span class="footer-right">Majid Allahiby&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-</footer>
+<header class="header">
 
-
-<body>
-    <div id="screenNoise"></div>      
-<div class="container">
-   <div class="header">
     <div class="header-left">
           <h2 class="page-title">
  📝 الملاحظات اليومية
@@ -278,13 +316,18 @@ body.dark-mode .app-footer {
     </div>
     <div class="header-right">
         <button id="toggleScroll">⏹️</button>
-        <button id="increaseFont">+</button>
-        <button id="decreaseFont">-</button>
         <button id="darkmode">🌙</button>
-        <button id="showMsg">!</button>
-
+        <button id="increaseFont">➕</button>
+        <button id="decreaseFont">➖</button>
+        <button id="showMsg">💬</button>
     </div>
-</div>
+</header>
+
+<body>
+<div id="screenFlash"></div>
+<div id="screenNoise"></div>
+<div class="container">
+
 
 <div class="notes-scroll-wrapper">
 
@@ -294,8 +337,13 @@ body.dark-mode .app-footer {
     </ul>
 
     </div>
+    </div>
 
 
+<footer class="app-footer">
+    <span class="footer-center">© <span id="year"></span> جميع الحقوق محفوظة – تصميم وتنفيذ شعبة تقنية المعلومات (IT)</span>
+    <span class="footer-right">Majid Allahiby</span>
+</footer>
 
 
 <script>
@@ -309,7 +357,7 @@ const notesList = document.getElementById("notesList");
 /*--------------دالة تنسيق التاريخ------------------------*/
 function formatDate(dateString) {
     const d = new Date(dateString);
-    return d.toLocaleString("en-EG", {
+    return d.toLocaleString("en-GB", {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
@@ -353,6 +401,9 @@ async function loadNotes() {
 
     notesList.appendChild(li);
 });
+
+// بعد كل عملية INSERT أو UPDATE أو DELETE
+flashScreen();
 
 }
 
@@ -408,7 +459,7 @@ document.getElementById("showMsg").addEventListener("click", () => {
         alert(msg);
 });
 
-
+/*................الوضع المظلم..........................*/
 const themeBtn = document.getElementById("darkmode");
 
 themeBtn.addEventListener("click", () => {
@@ -506,16 +557,27 @@ toggleScrollBtn.addEventListener('click', () => {
     if (isRunning) {
         requestAnimationFrame(animateNotes);
         toggleScrollBtn.textContent = "⏹️";
+        wrapper.classList.remove('scrollable'); // منع التمرير
     } else {
         // إلغاء الحركة وإظهار كل الملاحظات
         list.style.transform = 'translateY(0)';
         toggleScrollBtn.textContent = "▶️";
+        wrapper.classList.add('scrollable'); // السماح بالتمرير
     }
 });
 
 
-/*.....................................................*/
 
+/*.....................................................*/
+/*................Flash................................*/
+function flashScreen() {
+    const flash = document.getElementById('screenFlash');
+    flash.style.opacity = '1'; // يظهر التنبيه
+    setTimeout(() => {
+        flash.style.opacity = '0'; // يختفي بعد 300ms
+    }, 200);
+}
+/*....................................................*/
 /*.............. footer ..............................*/
 // تحديث السنة تلقائيًا
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -540,7 +602,7 @@ showFooter();
 
 /*...................................................*/
 
-
+/*..................الساعة....................*/
 function updateClock() {
     const clockEl = document.getElementById("clock");
     if (!clockEl) return;
@@ -576,7 +638,7 @@ function updateClock() {
 
 setInterval(updateClock, 1000);
 updateClock();
-
+/*...........................................................*/
 
 
 </script>

@@ -14,13 +14,15 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f4f8;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    min-height: 90vh;
     margin: 0;
-    padding-top: 50px;
+  /*  padding-top: 60px;   /* مساحة للـ header */
+  /*  padding-bottom: 60px;/* مساحة للـ footer */
     direction: rtl;
 }
+
 
 .container {
     background: #fff;
@@ -35,13 +37,30 @@ body {
 }
 
 /* --- العنوان مع أيقونة القلم --- */
- .header {
+.headerrrr {
+    position: fixed;
+    top: 10px;
+    width: calc(100% - 50px);
+    max-width: 600px;
     display: flex;
-    justify-content: space-between; /* العنوان جهة اليمين والأزرار جهة اليسار */
+    justify-content: space-between;
     align-items: center;
-    direction: rtl;
-    margin-bottom: 15px;
 }
+
+.header {
+    position: relative; /* أو احذف السطر نهائيًا */
+        top: 10px;
+    width: calc(100% - 50px);
+    max-width: 600px;
+    margin-bottom: 5px;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+}
+
+
+
+
 
 .header-left {
     display: flex;
@@ -65,8 +84,9 @@ body {
 }
 
 .header-right button {
-    padding: 3px 20px; /* صغير الحجم */
-    border-radius: 8px;
+    padding: 4px 4px; /* صغير الحجم */
+    font-size: 24px;
+    border-radius: 6px;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -75,11 +95,6 @@ body {
 /* تأثير hover و active */
 .header-right button:hover { filter: brightness(1.1); }
 .header-right button:active { filter: brightness(0.9); }
-
-/* إذا أردت تخصيص لون لكل زر */
-#toggleScroll { background-color: #CB64DD; }
-#showMsg { background-color: #9696FF; color:#fff; padding: 3px 25px; }
-
 /* --- مربع النص --- */
 textarea {
     width: 100%;
@@ -115,6 +130,8 @@ textarea {
 #sendBtn { background-color: #28a745; }
 #editBtn { background-color: #ffc107; color: black; }
 #deleteBtn { background-color: #dc3545; }
+#toggleScroll { background-color: #9c27b0; }
+#showMsg { background-color: #1B36CC; }
 
 /* تأثير hover */
 .button-group button:hover {
@@ -180,60 +197,71 @@ textarea {
     display: block;
 }
 
-
-
 .app-footer {
-    position: fixed;
-    bottom: 8px;
-    width: 100%;
+    position: relative;
+
+    margin-top: 30px;
+    padding: 10px;
+
     font-size: 14px;
     color: #666;
+    text-align: center;
+
     opacity: 0.8;
-    pointer-events: none;
-    direction: rtl;
+}
+
+
+.app-footerrrr {
+    position: fixed;
+    bottom: 8px;
+    width: calc(100% - 50px);
+    max-width: 600px;
+
+    backdrop-filter: blur(5px);
+
+    font-size: 13px;
+    color: #666;
+    padding: 8px 12px;
+
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+
     transition: opacity 0.3s ease;
 }
 
-.app-footer .footer-center {
-    margin: 0 auto;
-    pointer-events: auto;
-}
-
-.app-footer .footer-right {
-    pointer-events:auto;
-}
 
 body.dark-mode .app-footer {
     color: #aaa;
 }
 
-
+.page-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex: 1; /* يدفع الفوتر للأسفل */
+}
 </style>
 </head>
-<footer class="app-footer">
-    <span class="footer-center">© <span id="year"></span> جميع الحقوق محفوظة – تصميم وتنفيذ شعبة تقنية المعلومات (IT)</span>
-    <span class="footer-right">Majid Allahiby&nbsp;&nbsp;&nbsp;&nbsp;</span>
-</footer>
+
+
 <body>
-
-<div class="container">
-
-       <div class="header">
+    <header class="header">
     <div class="header-left">
-                  <h2 class="page-title">
-    ✏️ اكتب ملاحظاتك
-</h2>
+          <h3 class="page-title">
+          ✏️ اكتب ملاحظاتك
+         </h3>
     </div>
     <div class="header-right">
         <button id="toggleScroll">⏹️</button>
-        <button id="showMsg">!</button>
-
+        <button id="showMsg">💬</button>
     </div>
-</div>
+</header>
+<div class="page-content">
 
 
 
+<div class="container">
 
 
     <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
@@ -252,7 +280,11 @@ body.dark-mode .app-footer {
 
 
 </div>
-
+</div>
+<footer class="app-footer">
+    <span class="footer-center">© <span id="year"></span> جميع الحقوق محفوظة – تصميم وتنفيذ شعبة تقنية المعلومات (IT)</span>
+    <span class="footer-right">Majid Allahiby</span>
+</footer>
 <script>
 const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08"; // ضع هنا ANON_KEY
@@ -284,7 +316,7 @@ async function loadNotes() {
         const li = document.createElement("li");
 
         // النص + التاريخ
-        const time = new Date(n.updated_at).toLocaleString('en-EG', {
+        const time = new Date(n.updated_at).toLocaleString('en-GB', {
             hour12: true,
             year: 'numeric',
             month: '2-digit',
@@ -512,6 +544,7 @@ showFooter();
 
 loadNotes();
 </script>
+
 
 </body>
 </html>
