@@ -35,23 +35,50 @@ body {
 }
 
 /* --- العنوان مع أيقونة القلم --- */
-.header {
+ .header {
     display: flex;
+    justify-content: space-between; /* العنوان جهة اليمين والأزرار جهة اليسار */
     align-items: center;
-    justify-content: flex-start; /* الكتابة على اليمين في العربية */
     direction: rtl;
     margin-bottom: 15px;
 }
 
-.header h2 {
-    margin: 0;
+.header-left {
+    display: flex;
+    align-items: center;
 }
 
-.header img {
+.header-left h2 {
+    margin: 0;
+    order: 2;
+}
+
+.header-left img {
     width: 24px;
     height: 24px;
-    margin-left: 10px; /* فاصلة بين النص والقلم */
+    margin-left: 10px;
+    order: 1;
 }
+.header-right {
+    display: flex;
+    gap: 5px; /* مسافة صغيرة بين الأزرار */
+}
+
+.header-right button {
+    padding: 3px 20px; /* صغير الحجم */
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* تأثير hover و active */
+.header-right button:hover { filter: brightness(1.1); }
+.header-right button:active { filter: brightness(0.9); }
+
+/* إذا أردت تخصيص لون لكل زر */
+#toggleScroll { background-color: #CB64DD; }
+#showMsg { background-color: #9696FF; color:#fff; padding: 3px 25px; }
 
 /* --- مربع النص --- */
 textarea {
@@ -100,20 +127,20 @@ textarea {
 }
 
 
-
 .notes-scroll-wrapper {
-    height: 300px; /* أو حسب مساحة الصفحة */
-    overflow: hidden; /* يخفي ما يخرج عن المربع */
     position: relative;
+    overflow: hidden;
+    height: 270px;
 }
 
 .notes-list {
-    display: flex;
-    flex-direction: column;
     position: absolute;
-    bottom: -100%; /* البداية من أسفل */
-    animation: scrollNotes 25s linear infinite;
+    width: 100%;
+    top: 0;
 }
+
+
+
 
 .notes-list li {
     margin-bottom: 6px;
@@ -124,10 +151,6 @@ textarea {
     transition: background 0.2s ease;
 }
 
-@keyframes scrollNotes {
-    0%   { bottom: -100%; }
-    100% { bottom: 100%; } /* تتحرك لأعلى خارج المربع */
-}
 
 /* التحديد */
 .notes-list li.selected {
@@ -158,16 +181,60 @@ textarea {
 }
 
 
+
+.app-footer {
+    position: fixed;
+    bottom: 8px;
+    width: 100%;
+    font-size: 14px;
+    color: #666;
+    opacity: 0.8;
+    pointer-events: none;
+    direction: rtl;
+    display: flex;
+    transition: opacity 0.3s ease;
+}
+
+.app-footer .footer-center {
+    margin: 0 auto;
+    pointer-events: auto;
+}
+
+.app-footer .footer-right {
+    pointer-events:auto;
+}
+
+body.dark-mode .app-footer {
+    color: #aaa;
+}
+
+
 </style>
 </head>
+<footer class="app-footer">
+    <span class="footer-center">© <span id="year"></span> جميع الحقوق محفوظة – تصميم وتنفيذ شعبة تقنية المعلومات (IT)</span>
+    <span class="footer-right">Majid Allahiby&nbsp;&nbsp;&nbsp;&nbsp;</span>
+</footer>
 <body>
 
 <div class="container">
-    <div class="header">
-            <h2 class="page-title">
+
+       <div class="header">
+    <div class="header-left">
+                  <h2 class="page-title">
     ✏️ اكتب ملاحظاتك
 </h2>
     </div>
+    <div class="header-right">
+        <button id="toggleScroll">⏹️</button>
+        <button id="showMsg">!</button>
+
+    </div>
+</div>
+
+
+
+
 
     <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا..."></textarea>
     <div>
@@ -190,7 +257,8 @@ textarea {
 const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08"; // ضع هنا ANON_KEY
 window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+const NameTable = "notes";
+//const NameTable = "test_notes";
 
 const noteInput = document.getElementById("noteInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -203,7 +271,7 @@ let selectedNoteId = null;
 /* ------------------- تحميل الملاحظات ------------------- */
 async function loadNotes() {
     const { data, error } = await supabaseClient
-        .from("notes")
+        .from(NameTable)
         .select("*")
         .order("id", { ascending: true });
 
@@ -280,7 +348,7 @@ sendBtn.addEventListener("click", async () => {
     const text = noteInput.value.trim();
     if (!text) return;
 
-    const { data, error } = await supabaseClient.from("notes").insert([{ text: text, created_at: new Date(), updated_at: new Date() }]);
+    const { data, error } = await supabaseClient.from(NameTable).insert([{ text: text, created_at: new Date(), updated_at: new Date() }]);
     if (error) { alert("خطأ في الإرسال"); return; }
 
     noteInput.value = "";
@@ -295,7 +363,7 @@ editBtn.addEventListener("click", async () => {
     if (!newtext || !selectedNoteId) return;
 
     const { data, error } = await supabaseClient
-        .from("notes")
+        .from(NameTable)
         .update({ text: newtext , updated_at: new Date() })
         .eq("id", selectedNoteId);
 
@@ -312,7 +380,7 @@ deleteBtn.addEventListener("click", async () => {
     if (!selectedNoteId) return;
 
     const { data, error } = await supabaseClient
-        .from("notes")
+        .from(NameTable)
         .delete()
         .eq("id", selectedNoteId);
 
@@ -340,13 +408,21 @@ notesList.addEventListener('mouseleave', (e) => {
 
 /*......................................................*/
 
-
+ document.getElementById("showMsg").addEventListener("click", () => {
+   const msg="(IT)تصميم وتنفيذ شعبة تقنية المعلومات"
+        + "\n" + "مــــــاجـــــد جـــــــمــــال اللـــهــيـــبـــي"
+        + "\n" +  "احـــــمــــــــد إبــــــراهــــــــيم مــــــــداح"
+        +  "\n" + "عــــــمــــــــر عــــاصـــــم نــــاجــــــــــي" ;
+        alert(msg);
+});
 
 
 /* ------------------- Realtime ------------------- */
 supabaseClient
-    .channel('public:notes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, payload => {
+    .channel('public:NameTable')
+ /*   .channel('public:notes')  */
+    .on('postgres_changes', { event: '*', schema: 'public', table: NameTable }, payload => {
+  /*  .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, payload => {     */
         if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             addNoteToList(payload.new);
         } else if (payload.eventType === 'DELETE') {
@@ -356,6 +432,84 @@ supabaseClient
     })
     .subscribe();
 /* ------------------- تحميل أولي ------------------- */
+
+
+/*............... حركة الملاحظات ......................*/
+const wrapper = document.querySelector('.notes-scroll-wrapper');
+const list = document.querySelector('.notes-list');
+
+let offset = wrapper.offsetHeight;
+let speed = 0.3; // سرعة الحركة
+let isRunning = true;
+
+function animateNotes() {
+    if (!isRunning) return;
+
+    offset -= speed;
+    list.style.transform = `translateY(${offset}px)`;
+
+    const listHeight = list.offsetHeight;
+
+    // أول ما آخر ملاحظة تطلع بالكامل
+    if (offset <= -listHeight) {
+        offset = wrapper.offsetHeight;
+    }
+
+    requestAnimationFrame(animateNotes);
+}
+
+// تشغيل أولي
+animateNotes();
+
+
+/*...........................................................*/
+
+/*..............تشغيل الحركة وايقافها.......................*/
+const toggleScrollBtn =document.getElementById("toggleScroll");
+toggleScrollBtn.addEventListener('click', () => {
+    isRunning = !isRunning;
+
+    if (isRunning) {
+        requestAnimationFrame(animateNotes);
+        toggleScrollBtn.textContent = "⏹️";
+    } else {
+        // إلغاء الحركة وإظهار كل الملاحظات
+        list.style.transform = 'translateY(0)';
+        toggleScrollBtn.textContent = "▶️";
+    }
+});
+
+
+/*.....................................................*/
+
+
+/*.............. footer ..............................*/
+// تحديث السنة تلقائيًا
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// إخفاء footer عند عدم حركة الماوس لمدة 3 ثواني
+let footer = document.querySelector('.app-footer');
+let timeoutId;
+
+function showFooter() {
+    footer.style.opacity = '0.8';
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+        footer.style.opacity = '0';
+    }, 5000);
+}
+
+// عند تحريك الماوس نعيد الظهور
+document.addEventListener('mousemove', showFooter);
+
+// تشغيل لأول مرة
+showFooter();
+
+/*...................................................*/
+
+
+
+
 loadNotes();
 </script>
 

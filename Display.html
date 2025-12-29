@@ -47,7 +47,7 @@ body {
     width: 90%;            /* 90% من عرض الشاشة */
 
 
-    height: auto;          /* الارتفاع حسب المحتوى */
+    height:90%;          /* الارتفاع حسب المحتوى */
     max-height: 80vh;      /* أقصى ارتفاع 80% من ارتفاع الشاشة */
     overflow-y: auto;      /* شريط تمرير إذا زاد المحتوى */
 
@@ -109,26 +109,26 @@ body {
 .header-right button:active { filter: brightness(0.9); }
 
 /* إذا أردت تخصيص لون لكل زر */
+#toggleScroll { background-color: #9c27b0; }
 #increaseFont { background-color: #28a745; }
 #decreaseFont { background-color: #ffc107; color: black; }
 #showMsg { background-color: #dc3545; }
 #darkmode { background-color:#303030; color:#FAFAFA; }
 
-
-
 .notes-scroll-wrapper {
-    height: 600px; /* أو حسب مساحة الصفحة */
-    overflow: hidden; /* يخفي ما يخرج عن المربع */
     position: relative;
+    overflow: hidden;
+    height: 500px;
 }
 
 .notes-list {
-    display: flex;
-    flex-direction: column;
     position: absolute;
-    bottom: -100%; /* البداية من أسفل */
-    animation: scrollNotes 25s linear infinite;
+    width: 100%;
+    top: 0;
 }
+
+
+
 
 .notes-list li {
     margin-bottom: 6px;
@@ -138,15 +138,6 @@ body {
     cursor: pointer;
     transition: background 0.2s ease;
 }
-
-@keyframes scrollNotes {
-    0%   { bottom: -100%; }
-    100% { bottom: 100%; } /* تتحرك لأعلى خارج المربع */
-}
-
-
-
-
 
 
 
@@ -178,6 +169,15 @@ body {
 .notes-list li.selected .note-time {
     display: block;
 }
+
+
+
+/* وضع العرض الثابت (بدون حركة) */
+.notes-list.static {
+    animation: none !important;
+    position: static;
+}
+
 
 
 
@@ -226,51 +226,62 @@ body.dark-mode #darkmode{
 }
 
 
-
-.editor-credit {
-    width:100%;
-    text-align:center;
-    font-size:12px;
-    color:#888;
-    padding:5px 0 15px 0;
-    opacity:0.8;
+.app-footer {
+    position: fixed;
+    bottom: 8px;
+    width: 100%;
+    font-size: 14px;
+    color: #666;
+    opacity: 0.8;
+    pointer-events: none;
+    direction: rtl;
+    display: flex;
+    transition: opacity 0.3s ease;
 }
 
-.footer {
-    width:100%;
-    text-align:center;
-    padding:1px 0;
-    font-size:11px;
-    color:#ccc;
-    border-top:1px solid rgba(255,255,255,0.2);
+.app-footer .footer-center {
+    margin: 0 auto;
+    pointer-events: auto;
 }
+
+.app-footer .footer-right {
+    pointer-events:auto;
+}
+
+body.dark-mode .app-footer {
+    color: #aaa;
+}
+
 
 
 
 </style>
 </head>
-<body>
-    <div id="screenNoise"></div>
+<footer class="app-footer">
+    <span class="footer-center">© <span id="year"></span> جميع الحقوق محفوظة – تصميم وتنفيذ شعبة تقنية المعلومات (IT)</span>
+    <span class="footer-right">Majid Allahiby&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+</footer>
 
+
+<body>
+    <div id="screenNoise"></div>      
 <div class="container">
    <div class="header">
     <div class="header-left">
           <h2 class="page-title">
  📝 الملاحظات اليومية
 </h2>
-
     </div>
-
-
                               <!-- الساعة في الوسط -->
     <div class="header-center">
         <span id="clock">00:00:00 AM</span>
     </div>
     <div class="header-right">
+        <button id="toggleScroll">⏹️</button>
         <button id="increaseFont">+</button>
         <button id="decreaseFont">-</button>
-        <button id="showMsg">!</button>
         <button id="darkmode">🌙</button>
+        <button id="showMsg">!</button>
 
     </div>
 </div>
@@ -292,7 +303,8 @@ body.dark-mode #darkmode{
 const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08"; // ضع هنا ANON_KEY
 window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+const NameTable = "notes";
+//const NameTable = "test_notes";
 const notesList = document.getElementById("notesList");
 /*--------------دالة تنسيق التاريخ------------------------*/
 function formatDate(dateString) {
@@ -314,7 +326,7 @@ function formatDate(dateString) {
 /* ------------------- تحميل الملاحظات ------------------- */
 async function loadNotes() {
     const { data, error } = await supabaseClient
-        .from("notes")
+        .from(NameTable)
         .select("*")
         .order("id", { ascending: true });
 
@@ -358,8 +370,8 @@ function addNoteToList(note) {
 
 /* ------------------- Realtime ------------------- */
 supabaseClient
-    .channel('public:notes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, payload => {
+    .channel('public:'+NameTable)
+    .on('postgres_changes', { event: '*', schema: 'public', table: NameTable }, payload => {
         if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             addNoteToList(payload.new);
         } else if (payload.eventType === 'DELETE') {
@@ -389,7 +401,11 @@ document.getElementById("decreaseFont").addEventListener("click", () => {
 });
 
 document.getElementById("showMsg").addEventListener("click", () => {
-        alert("تصميم وتنفذ شعبة تقنية المعلومات ");
+   const msg="(IT)تصميم وتنفيذ شعبة تقنية المعلومات"
+        + "\n" + "مــــــاجـــــد جـــــــمــــال اللـــهــيـــبـــي"
+        + "\n" +  "احـــــمــــــــد إبــــــراهــــــــيم مــــــــداح"
+        +  "\n" + "عــــــمــــــــر عــــاصـــــم نــــاجــــــــــي" ;
+        alert(msg);
 });
 
 
@@ -428,7 +444,7 @@ function generateNoise() {
 }
 
 // كل نصف ثانية نغير الضوضاء
-setInterval(generateNoise, 5000);
+setInterval(generateNoise, 3600000);
 
 /*.......................................................*/
 
@@ -449,19 +465,103 @@ notesList.addEventListener('mouseleave', (e) => {
 
 /*......................................................*/
 
+/*............... حركة الملاحظات ......................*/
+const wrapper = document.querySelector('.notes-scroll-wrapper');
+const list = document.querySelector('.notes-list');
+
+let offset = wrapper.offsetHeight;
+let speed = 0.3; // سرعة الحركة
+let isRunning = true;
+
+function animateNotes() {
+    if (!isRunning) return;
+
+    offset -= speed;
+    list.style.transform = `translateY(${offset}px)`;
+
+    const listHeight = list.offsetHeight;
+
+    // أول ما آخر ملاحظة تطلع بالكامل
+    if (offset <= -listHeight) {
+        offset = wrapper.offsetHeight;
+    }
+
+    requestAnimationFrame(animateNotes);
+}
+
+// تشغيل أولي
+animateNotes();
+
+
+/*...........................................................*/
 
 
 
 
+/*..............تشغيل الحركة وايقافها.......................*/
+const toggleScrollBtn =document.getElementById("toggleScroll");
+toggleScrollBtn.addEventListener('click', () => {
+    isRunning = !isRunning;
+
+    if (isRunning) {
+        requestAnimationFrame(animateNotes);
+        toggleScrollBtn.textContent = "⏹️";
+    } else {
+        // إلغاء الحركة وإظهار كل الملاحظات
+        list.style.transform = 'translateY(0)';
+        toggleScrollBtn.textContent = "▶️";
+    }
+});
+
+
+/*.....................................................*/
+
+/*.............. footer ..............................*/
+// تحديث السنة تلقائيًا
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// إخفاء footer عند عدم حركة الماوس لمدة 3 ثواني
+let footer = document.querySelector('.app-footer');
+let timeoutId;
+
+function showFooter() {
+    footer.style.opacity = '0.8';
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+        footer.style.opacity = '0';
+    }, 5000);
+}
+
+// عند تحريك الماوس نعيد الظهور
+document.addEventListener('mousemove', showFooter);
+
+// تشغيل لأول مرة
+showFooter();
+
+/*...................................................*/
 
 
 function updateClock() {
     const clockEl = document.getElementById("clock");
+    if (!clockEl) return;
+
     const now = new Date();
-    let hours = now.getHours();
+    let hours = now.getHours();   // ✅ let وليس const
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
     const ampm = hours >= 12 ? "PM" : "AM";
+ /*   if(hours===7 && minutes===0 && seconds===0)
+    {
+        location.reload();
+    }   */
+     const reloadTimes = [7, 18]; // 7 صباحًا و6 مساءً
+    reloadTimes.forEach(hour => {
+        if (hours === hour && minutes === 0 && seconds === 0) {
+            location.reload(); // إعادة تحميل الصفحة
+        }
+    });
+
+
 
     hours = hours % 12;
     hours = hours ? hours : 12; // الساعة 12 بدل 0
@@ -474,12 +574,8 @@ function updateClock() {
     clockEl.textContent = formattedTime;
 }
 
-
-
-
-// تحديث كل ثانية
 setInterval(updateClock, 1000);
-updateClock(); // استدعاء فور تحميل الصفحة
+updateClock();
 
 
 
