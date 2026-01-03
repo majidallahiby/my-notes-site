@@ -11,16 +11,53 @@
     body {
     display: flex;
     flex-direction: column; /* header + container + footer يتحركون مع بعض */
-    align-items: center;    /* محتوى الصفحة بالوسط */
+/*    align-items: center;    /* محتوى الصفحة بالوسط */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f0f0;
-        min-height: 90vh;
+        height: 100vh; /* مهم جداً */
     margin: 0;
     padding: 0;
     font-size: 24px;
 }
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f0f0;
+    margin: 0;
+    height: 100vh;
+    font-size: 24px;
+}
 
 .header {
+    width: 90%;
+    margin: 5px auto;
+    display: flex;
+    align-items: center;
+}
+
+.header-left {
+    flex: 1;
+    text-align: right;
+}
+
+.header-center {
+    flex: 1;
+    text-align: right;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.header-right {
+/*    flex: 1; */
+    text-align: left;
+    display: flex;
+    gap: 5px;
+    justify-content: flex-start;
+}
+
+
+.headerr {
     position: relative; /* أو احذف السطر نهائيًا */
    width: 90%;
     justify-content: space-between;
@@ -31,17 +68,17 @@
 
 /* ================= header ================= */
 
-.header-left {
+.headerr-left {
     justify-self: start;  /* العنوان جهة اليمين */
 }
 
-.header-center {
+.headerr-center {
     justify-self: center; /* الساعة بالوسط */
     font-size: 30px;
     font-weight: bold;
 }
 
-.header-right {
+.headerr-right {
     justify-self: end;    /* الأزرار جهة اليسار */
     display: flex;
     gap: 5px;
@@ -54,25 +91,18 @@
     display: flex;
     justify-content: space-between;
     width: 90%;
-    max-width: 600px;
-    margin: 15px auto 20px auto; /* يتبع الـ container */
+  /*  max-width: 600px; */
+    margin: 10px auto 10px auto; /* يتبع الـ container */
     direction: rtl;
 }
-
-
-.app-footerrrr {
-    position: fixed;
-    bottom: 8px;
+.app-footer {
+    width: 90%;
+    margin: 10px auto 15px auto;
     font-size: 14px;
-    color: #666;
-    opacity: 0.8;
-    pointer-events: none;
-    direction: rtl;
     display: flex;
-    transition: opacity 0.3s ease;
-    left: 50px;
-    right: 50px;
+    justify-content: space-between;
 }
+
 
 .app-footer .footer-center {
     margin: 0 auto;
@@ -84,20 +114,6 @@
 
 body.dark-mode .app-footer {
     color: #aaa;
-}
-
- .headerrrr {
-    display: flex;
-    justify-content: space-between; /* العنوان جهة اليمين والأزرار جهة اليسار */
-    align-items: center;
-    direction: rtl;
-    margin-bottom: 15px;
-    text-align: center;
-    position: fixed;
-    top: 0;
-    right: 3.5%;
-    left: 3.5%;
-  /*  z-index: 1000;       */
 }
 
 
@@ -129,7 +145,7 @@ body.dark-mode .app-footer {
 
 
 
-    .container {
+    .containerr {
     background: #f8f8f8;
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
@@ -146,7 +162,17 @@ body.dark-mode .app-footer {
     flex-direction: column;
     align-items: stretch;
 }
-
+.container {
+    width: 90%;
+    margin: 0 auto;
+    flex: 1;              /* 🔑 المفتاح */
+    background: #f8f8f8;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
 
 /* إذا أردت تخصيص لون لكل زر */
@@ -159,8 +185,10 @@ body.dark-mode .app-footer {
 .notes-scroll-wrapper {
     position: relative;
     overflow: hidden;
-    height: 500px;
+        flex: 1;
+  /*  height: 500px; */
 }
+
 
 .notes-list {
     position: absolute;
