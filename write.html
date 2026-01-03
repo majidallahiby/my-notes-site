@@ -9,20 +9,16 @@
 
 <style>
 /* --- جسم الصفحة والمربع --- */
-/* --- جسم الصفحة والمربع --- */
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f4f8;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    min-height: 90vh;
     margin: 0;
-  /*  padding-top: 60px;   /* مساحة للـ header */
-  /*  padding-bottom: 60px;/* مساحة للـ footer */
+    height: 100vh;      /* 🔑 */
     direction: rtl;
 }
-
 
 .container {
     background: #fff;
@@ -33,33 +29,19 @@ body {
     max-width: 600px;
     display: flex;
     flex-direction: column;
-    align-items: stretch; /* يجعل المحتوى يمتد بعرض المربع */
+    flex: 1;              /* 🔑 */
 }
 
 /* --- العنوان مع أيقونة القلم --- */
-.headerrrr {
-    position: fixed;
-    top: 10px;
-    width: calc(100% - 50px);
-    max-width: 600px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 
 .header {
-    position: relative; /* أو احذف السطر نهائيًا */
-        top: 10px;
-    width: calc(100% - 50px);
+    width: 90%;
     max-width: 600px;
-    margin-bottom: 5px;
-    justify-content: space-between;
+    margin: 10px auto;
     display: flex;
+    justify-content: space-between;
     align-items: center;
 }
-
-
-
 
 
 .header-left {
@@ -105,7 +87,11 @@ textarea {
     border: 1px solid #ccc;
     resize: none;
     margin-bottom: 15px;
+    min-height: 120px;
+    max-height: 30vh;
 }
+
+
    /* --- حاوية الأزرار --- */
 .button-group {
     display: flex;
@@ -144,21 +130,27 @@ textarea {
 }
 
 
+
 .notes-scroll-wrapper {
     position: relative;
-    overflow: hidden;
-    height: 270px;
+    overflow-y: hidden; /* Scroll مخفي أثناء الحركة */
+    overflow-x: hidden; /* Scroll مخفي أثناء الحركة */
+    flex: 1;
+    max-height: 40vh;   /* نصف ارتفاع الشاشة */
+    height: 30vh;       /* ارتفاع ثابت بالنسبة للشاشة */
 }
 
 .notes-list {
-    position: absolute;
+    /* position: absolute;  ← احذف هذا */
+    position: relative;   /* ✅ */
     width: 100%;
-    top: 0;
+    top: 0; /* يمكن حذفه إذا لم يعد مطلوب */
 }
 
 
-
-
+.notes-scroll-wrapper.scrollable {
+    overflow-y: auto; /* عند توقف الحركة */
+}
 .notes-list li {
     margin-bottom: 6px;
     padding: 10px 12px;
@@ -166,8 +158,14 @@ textarea {
     background: #f2f2f2;
     cursor: pointer;
     transition: background 0.2s ease;
-}
 
+    /* --- أضف هذه الأسطر --- */
+    overflow-wrap: break-word; /* يقسم الكلمات الطويلة */
+    word-wrap: break-word;     /* دعم قديم */
+    hyphens: auto;             /* يسمح بفواصل في الكلمات إذا ممكن */
+    max-width: 90%;           /* لا تتجاوز عرض container */
+    box-sizing: border-box;    /* يشمل padding ضمن العرض */
+}
 
 /* التحديد */
 .notes-list li.selected {
@@ -198,38 +196,13 @@ textarea {
 }
 
 .app-footer {
-    position: relative;
-
-    margin-top: 30px;
-    padding: 10px;
-
+    margin: 10px auto 15px auto;
+    width: 90%;
+    max-width: 600px;
     font-size: 14px;
-    color: #666;
     text-align: center;
-
     opacity: 0.8;
 }
-
-
-.app-footerrrr {
-    position: fixed;
-    bottom: 8px;
-    width: calc(100% - 50px);
-    max-width: 600px;
-
-    backdrop-filter: blur(5px);
-
-    font-size: 13px;
-    color: #666;
-    padding: 8px 12px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    transition: opacity 0.3s ease;
-}
-
 
 body.dark-mode .app-footer {
     color: #aaa;
@@ -239,8 +212,9 @@ body.dark-mode .app-footer {
     width: 100%;
     display: flex;
     justify-content: center;
-    flex: 1; /* يدفع الفوتر للأسفل */
+    flex: 1; /* 🔑 يدفع الفوتر للأسفل */
 }
+
 </style>
 </head>
 
@@ -289,6 +263,7 @@ body.dark-mode .app-footer {
 const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08"; // ضع هنا ANON_KEY
 window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const NameTable = "notes";
 //const NameTable = "test_notes";
 
@@ -470,7 +445,7 @@ supabaseClient
 const wrapper = document.querySelector('.notes-scroll-wrapper');
 const list = document.querySelector('.notes-list');
 
-let offset = wrapper.offsetHeight;
+let offset = 0;
 let speed = 0.3; // سرعة الحركة
 let isRunning = true;
 
@@ -497,18 +472,25 @@ animateNotes();
 /*...........................................................*/
 
 /*..............تشغيل الحركة وايقافها.......................*/
-const toggleScrollBtn =document.getElementById("toggleScroll");
+const toggleScrollBtn = document.getElementById("toggleScroll");
 toggleScrollBtn.addEventListener('click', () => {
     isRunning = !isRunning;
 
     if (isRunning) {
-        requestAnimationFrame(animateNotes);
+        // إعادة تشغيل الحركة → Scroll مخفي دائمًا
+        wrapper.style.overflowY = 'hidden';
         toggleScrollBtn.textContent = "⏹️";
+        animateNotes(); // استمرار الحركة
+    } else  {
+    list.style.transform = 'translateY(0)';
+    toggleScrollBtn.textContent = "▶️";
+    if (list.scrollHeight > wrapper.clientHeight) {
+        wrapper.style.overflowY = 'auto';
     } else {
-        // إلغاء الحركة وإظهار كل الملاحظات
-        list.style.transform = 'translateY(0)';
-        toggleScrollBtn.textContent = "▶️";
+        wrapper.style.overflowY = 'hidden';
     }
+}
+
 });
 
 

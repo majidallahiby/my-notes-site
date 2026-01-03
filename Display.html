@@ -19,15 +19,6 @@
     padding: 0;
     font-size: 24px;
 }
-body {
-    display: flex;
-    flex-direction: column;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f0f0;
-    margin: 0;
-    height: 100vh;
-    font-size: 24px;
-}
 
 .header {
     width: 90%;
@@ -56,33 +47,6 @@ body {
     justify-content: flex-start;
 }
 
-
-.headerr {
-    position: relative; /* أو احذف السطر نهائيًا */
-   width: 90%;
-    justify-content: space-between;
-    display: flex;
-    align-items: center;
-}
-
-
-/* ================= header ================= */
-
-.headerr-left {
-    justify-self: start;  /* العنوان جهة اليمين */
-}
-
-.headerr-center {
-    justify-self: center; /* الساعة بالوسط */
-    font-size: 30px;
-    font-weight: bold;
-}
-
-.headerr-right {
-    justify-self: end;    /* الأزرار جهة اليسار */
-    display: flex;
-    gap: 5px;
-}
 
 /* ================= footer ================= */
 .app-footer {
@@ -144,24 +108,6 @@ body.dark-mode .app-footer {
 }
 
 
-
-    .containerr {
-    background: #f8f8f8;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-
-    /* حجم المربع ملائم للشاشة */
-    width: 90%;            /* 90% من عرض الشاشة */
-
-
-    height:90%;          /* الارتفاع حسب المحتوى */
-    max-height: 80vh;      /* أقصى ارتفاع 80% من ارتفاع الشاشة */
-    overflow-y: auto;      /* شريط تمرير إذا زاد المحتوى */
-
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-}
 .container {
     width: 90%;
     margin: 0 auto;
@@ -186,9 +132,7 @@ body.dark-mode .app-footer {
     position: relative;
     overflow: hidden;
         flex: 1;
-  /*  height: 500px; */
 }
-
 
 .notes-list {
     position: absolute;
@@ -379,8 +323,10 @@ body.dark-mode #screenFlash {
 const SUPABASE_URL = "https://ecikwipkukvyqipejlay.supabase.co"; // ضع هنا رابط المشروع
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaWt3aXBrdWt2eXFpcGVqbGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NzIxMzEsImV4cCI6MjA3OTE0ODEzMX0.LXeXcwG00I4yaNQrlGeZCMDTllecH6QyUpB9BTrCY08"; // ضع هنا ANON_KEY
 window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const NameTable = "notes";
 //const NameTable = "test_notes";
+
 const notesList = document.getElementById("notesList");
 /*--------------دالة تنسيق التاريخ------------------------*/
 function formatDate(dateString) {
@@ -650,9 +596,6 @@ function updateClock() {
             location.reload(); // إعادة تحميل الصفحة
         }
     });
-
-
-
     hours = hours % 12;
     hours = hours ? hours : 12; // الساعة 12 بدل 0
 
