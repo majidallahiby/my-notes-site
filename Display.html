@@ -244,9 +244,11 @@ body.dark-mode button:hover {
 body.dark-mode button:active {
     background: #222;
 }
-body.dark-mode #darkmode{
-    background: #f0f0f0;
-}
+body.dark-mode #toggleScroll { background-color: #E585E5; }
+body.dark-mode #increaseFont { background-color: #8CE3A0; }
+body.dark-mode #decreaseFont { background-color: #FFDA6B; color: black; }
+body.dark-mode #showMsg { background-color: #6F81EC; }
+body.dark-mode #darkmode { background-color:#f0f0f0; color:#FAFAFA; }
 
 
 
@@ -426,10 +428,10 @@ document.getElementById("decreaseFont").addEventListener("click", () => {
 });
 
 document.getElementById("showMsg").addEventListener("click", () => {
-   const msg="(IT)تصميم وتنفيذ شعبة تقنية المعلومات"
-        + "\n" + "مــــــاجـــــد جـــــــمــــال اللـــهــيـــبـــي"
-        + "\n" +  "احـــــمــــــــد إبــــــراهــــــــيم مــــــــداح"
-        +  "\n" + "عــــــمــــــــر عــــاصـــــم نــــاجــــــــــي" ;
+   const msg="\n"+"تصميم وتنفيذ شعبة تقنية المعلومات"+ " (IT)" + "\n"
+        + "\n" + "ماجد جمال اللهيبي" + "\n"
+        + "\n" +  "احمـد ابـراهيم مـداح" + "\n"
+        +  "\n" + "عــمـر عـاصـم نـاجي" ; + "\n"
         alert(msg);
 });
 
@@ -539,19 +541,18 @@ toggleScrollBtn.addEventListener('click', () => {
         wrapper.classList.add('scrollable'); // السماح بالتمرير
     }
 });
-
-
-
 /*.....................................................*/
+
 /*................Flash................................*/
 function flashScreen() {
     const flash = document.getElementById('screenFlash');
     flash.style.opacity = '1'; // يظهر التنبيه
     setTimeout(() => {
         flash.style.opacity = '0'; // يختفي بعد 300ms
-    }, 200);
+    }, 500);
 }
 /*....................................................*/
+
 /*.............. footer ..............................*/
 // تحديث السنة تلقائيًا
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -586,16 +587,14 @@ function updateClock() {
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
     const ampm = hours >= 12 ? "PM" : "AM";
- /*   if(hours===7 && minutes===0 && seconds===0)
-    {
-        location.reload();
-    }   */
      const reloadTimes = [7, 18]; // 7 صباحًا و6 مساءً
     reloadTimes.forEach(hour => {
         if (hours === hour && minutes === 0 && seconds === 0) {
             location.reload(); // إعادة تحميل الصفحة
-        }
+            }
     });
+
+
     hours = hours % 12;
     hours = hours ? hours : 12; // الساعة 12 بدل 0
 
@@ -609,6 +608,23 @@ function updateClock() {
 
 setInterval(updateClock, 1000);
 updateClock();
+/*...........................................................*/
+
+/*..................تغير الوضع الليلي اوتوماتيك......................*/
+function autoDarkMode() {
+    const now = new Date();
+    const hour = now.getHours(); // 0 → 23
+    const body = document.body;
+
+    // من 6 مساءً إلى 7 صباحًا
+    if (hour >= 18 || hour < 7) {
+        body.classList.add("dark-mode");
+    } else {
+        body.classList.remove("dark-mode");
+    }
+}
+// تشغيل عند فتح الصفحة
+autoDarkMode();
 /*...........................................................*/
 
 
